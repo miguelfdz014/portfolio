@@ -9,6 +9,7 @@ export const dictionaries = {
     'hero.subtitle': 'Developer & digital craftsman — forging things for the web, one stone at a time.',
     'hero.cta': 'Enter the castle',
     'hero.scroll': 'Scroll',
+    'descent.line': 'Beyond the clouds, a fortress rises from the sea.',
     'about.kicker': 'Chapter I',
     'about.title': 'The Chronicle',
     'about.body1':
@@ -36,6 +37,7 @@ export const dictionaries = {
     'hero.subtitle': 'Desarrollador y artesano digital — forjando cosas para la web, piedra a piedra.',
     'hero.cta': 'Entrar al castillo',
     'hero.scroll': 'Desliza',
+    'descent.line': 'Más allá de las nubes, una fortaleza se alza sobre el mar.',
     'about.kicker': 'Capítulo I',
     'about.title': 'La Crónica',
     'about.body1':

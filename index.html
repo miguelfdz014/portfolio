@@ -20,6 +20,7 @@
   </head>
   <body>
     <a class="skip-link" href="#about">Skip to content</a>
+    <div class="scene" id="scene" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
 
     <header class="nav" id="nav">
@@ -38,8 +39,7 @@
 
     <main>
       <!-- ======================= HERO ======================= -->
-      <section class="hero" id="hero">
-        <div class="scene" id="scene" aria-hidden="true"></div>
+      <section class="hero" id="hero" data-cam>
 
         <div class="hero__content">
           <p class="meta"><span class="meta__dot"></span><span data-i18n="hero.eyebrow">Under the pale moon</span> — <span id="roman-year"></span></p>
@@ -67,8 +67,13 @@
         </a>
       </section>
 
+      <!-- ======================= DESCENT ======================= -->
+      <section class="descent" data-cam aria-label="Interlude">
+        <p class="descent__line reveal" data-i18n="descent.line">Beyond the clouds, a fortress rises from the sea.</p>
+      </section>
+
       <!-- ======================= ABOUT ======================= -->
-      <section class="section" id="about">
+      <section class="section" id="about" data-cam>
         <div class="section__inner section__inner--split">
           <header class="section__head reveal">
             <p class="kicker"><span class="kicker__num">01</span><span data-i18n="about.kicker">Chapter I</span></p>
@@ -85,7 +90,7 @@
       </section>
 
       <!-- ======================= PROJECTS ======================= -->
-      <section class="section section--projects" id="projects">
+      <section class="section section--projects" id="projects" data-cam>
         <div class="section__inner">
           <header class="section__head section__head--row reveal">
             <div>
@@ -99,7 +104,7 @@
       </section>
 
       <!-- ======================= CONTACT ======================= -->
-      <section class="section section--contact" id="contact">
+      <section class="section section--contact" id="contact" data-cam>
         <div class="section__inner">
           <header class="section__head reveal">
             <p class="kicker"><span class="kicker__num">03</span><span data-i18n="contact.kicker">Chapter III</span></p>

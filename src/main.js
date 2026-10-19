@@ -119,9 +119,12 @@ const toggle = document.getElementById('lang-toggle');
 function syncToggle(lang) {
   toggle.querySelectorAll('[data-lang]').forEach((s) => s.classList.toggle('is-active', s.dataset.lang === lang));
 }
+let world = null;
 onLangChange((lang) => {
   syncToggle(lang);
   renderProjects();
+  // Text length changes section heights, which moves the camera stops.
+  world?.remeasure();
 });
 toggle.addEventListener('click', () => setLang(getLang() === 'en' ? 'es' : 'en'));
 initLang();
@@ -136,5 +139,7 @@ onScrollNav();
 // ---------- 3D scene (loaded separately so the page text appears first) ----------
 const sceneEl = document.getElementById('scene');
 import('./scene/world.js')
-  .then(({ startWorld }) => startWorld(sceneEl, { reducedMotion }))
+  .then(({ startWorld }) => {
+    world = startWorld(sceneEl, { reducedMotion }) ?? null;
+  })
   .catch(() => sceneEl.classList.add('no-webgl'));
