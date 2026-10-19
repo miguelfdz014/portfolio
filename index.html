@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Miguel Fernández</title>
     <meta name="description" content="Portfolio of Miguel Fernández — developer and digital craftsman." />
-    <meta name="theme-color" content="#05060a" />
+    <meta name="theme-color" content="#050506" />
     <meta property="og:title" content="Miguel Fernández" />
     <meta property="og:description" content="Developer & digital craftsman — forging things for the web." />
     <meta property="og:type" content="website" />
@@ -13,24 +13,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#about">Skip to content</a>
+    <div class="grain" aria-hidden="true"></div>
 
     <header class="nav" id="nav">
-      <a class="nav__brand" href="#hero" aria-label="Miguel Fernández — home">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><use href="#icon-moon" /></svg>
-        <span>MF</span>
-      </a>
+      <a class="nav__brand" href="#hero" aria-label="Miguel Fernández — home">M<span>·</span>F</a>
       <nav aria-label="Primary">
         <ul class="nav__links">
-          <li><a href="#about" data-i18n="nav.about">About</a></li>
-          <li><a href="#projects" data-i18n="nav.projects">Projects</a></li>
-          <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+          <li><a href="#about"><span class="nav__num">01</span><span data-i18n="nav.about">About</span></a></li>
+          <li><a href="#projects"><span class="nav__num">02</span><span data-i18n="nav.projects">Projects</span></a></li>
+          <li><a href="#contact"><span class="nav__num">03</span><span data-i18n="nav.contact">Contact</span></a></li>
         </ul>
       </nav>
       <button class="lang-toggle" id="lang-toggle" type="button" data-i18n-aria="lang.label" aria-label="Switch language">
@@ -41,141 +39,19 @@
     <main>
       <!-- ======================= HERO ======================= -->
       <section class="hero" id="hero">
-        <div class="scene" aria-hidden="true">
-          <div class="scene__sky"></div>
-          <canvas class="scene__stars" id="stars"></canvas>
-
-          <div class="layer" data-depth="0.08">
-            <div class="moon">
-              <div class="moon__halo"></div>
-              <div class="moon__body"></div>
-            </div>
-          </div>
-
-          <div class="layer" data-depth="0.15">
-            <div class="cloud cloud--1"></div>
-            <div class="cloud cloud--2"></div>
-          </div>
-
-          <!-- Far mountains -->
-          <div class="layer" data-depth="0.22">
-            <svg class="mountains mountains--far" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
-              <path
-                d="M0 400 L0 250 L90 205 L170 235 L260 170 L330 210 L420 150 L520 220 L600 190 L690 240 L780 175 L860 205 L960 140 L1060 210 L1150 180 L1240 230 L1330 190 L1440 225 L1440 400 Z"
-              />
-            </svg>
-          </div>
-
-          <div class="layer" data-depth="0.3">
-            <div class="fog fog--back"></div>
-          </div>
-
-          <!-- Near hills -->
-          <div class="layer" data-depth="0.38">
-            <svg class="mountains mountains--near" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
-              <path
-                d="M0 400 L0 300 Q120 260 240 290 T480 285 Q600 300 700 320 T960 300 Q1100 270 1220 295 T1440 280 L1440 400 Z"
-              />
-            </svg>
-          </div>
-
-          <!-- Castle on the cliff -->
-          <div class="layer" data-depth="0.5">
-            <svg class="castle" viewBox="380 0 620 600" preserveAspectRatio="xMidYMax meet">
-              <defs>
-                <linearGradient id="rim" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" stop-color="#6fa8ff" stop-opacity="0.55" />
-                  <stop offset="0.12" stop-color="#6fa8ff" stop-opacity="0" />
-                </linearGradient>
-              </defs>
-              <g class="castle__body">
-                <!-- cliff -->
-                <path d="M380 600 L420 540 L455 520 L470 498 L515 478 L548 470 L572 446 L890 446 L915 462 L948 470 L975 500 L1000 530 L1000 600 Z" />
-                <!-- curtain wall -->
-                <rect x="560" y="378" width="340" height="72" />
-                <g class="merlons">
-                  <rect x="560" y="366" width="12" height="14" /><rect x="584" y="366" width="12" height="14" />
-                  <rect x="660" y="366" width="12" height="14" />
-                  <rect x="800" y="366" width="12" height="14" /><rect x="872" y="366" width="12" height="14" />
-                  <rect x="888" y="366" width="12" height="14" />
-                </g>
-                <!-- left turret -->
-                <rect x="556" y="324" width="30" height="60" />
-                <polygon points="550,326 571,276 592,326" />
-                <!-- left tower -->
-                <rect x="602" y="256" width="52" height="130" />
-                <polygon points="594,258 628,162 662,258" />
-                <!-- keep -->
-                <rect x="676" y="226" width="118" height="160" />
-                <g>
-                  <rect x="676" y="212" width="14" height="16" /><rect x="702" y="212" width="14" height="16" />
-                  <rect x="754" y="212" width="14" height="16" /><rect x="780" y="212" width="14" height="16" />
-                </g>
-                <!-- central spire -->
-                <rect x="716" y="134" width="40" height="96" />
-                <polygon points="708,136 736,30 764,136" />
-                <!-- right tower -->
-                <rect x="818" y="286" width="48" height="100" />
-                <polygon points="810,288 842,204 874,288" />
-                <!-- far-right turret -->
-                <rect x="880" y="336" width="26" height="50" />
-                <polygon points="875,338 893,296 911,338" />
-                <!-- spire tips -->
-                <rect x="735" y="10" width="2" height="22" />
-                <rect x="627" y="146" width="2" height="18" />
-                <rect x="841" y="190" width="2" height="16" />
-              </g>
-              <!-- moonlight rim on the left edges -->
-              <g class="castle__rim" fill="url(#rim)">
-                <rect x="602" y="256" width="52" height="130" />
-                <rect x="676" y="226" width="118" height="160" />
-                <rect x="716" y="134" width="40" height="96" />
-                <rect x="818" y="286" width="48" height="100" />
-              </g>
-              <!-- pennants -->
-              <path class="pennant" d="M737 10 L762 16 L737 22 Z" />
-              <path class="pennant pennant--small" d="M629 146 L646 151 L629 156 Z" />
-              <path class="pennant pennant--small" d="M843 190 L858 195 L843 200 Z" />
-              <!-- gate -->
-              <path class="castle__gate" d="M714 450 L714 412 Q735 388 756 412 L756 450 Z" />
-              <!-- lit windows -->
-              <g class="windows">
-                <rect class="win" x="622" y="290" width="8" height="16" rx="4" />
-                <rect class="win win--b" x="622" y="330" width="8" height="14" rx="4" />
-                <rect class="win win--c" x="700" y="260" width="9" height="18" rx="4.5" />
-                <rect class="win win--rose" x="732" y="160" width="8" height="18" rx="4" />
-                <rect class="win win--b" x="760" y="260" width="9" height="18" rx="4.5" />
-                <rect class="win" x="730" y="310" width="10" height="20" rx="5" />
-                <rect class="win win--c" x="838" y="316" width="8" height="15" rx="4" />
-                <rect class="win win--rose" x="566" y="345" width="6" height="12" rx="3" />
-                <rect class="win win--b" x="889" y="356" width="6" height="11" rx="3" />
-              </g>
-            </svg>
-          </div>
-
-          <div class="layer" data-depth="0.65">
-            <div class="fog fog--mid"></div>
-          </div>
-          <div class="layer" data-depth="0.8">
-            <div class="fog fog--front"></div>
-          </div>
-
-          <canvas class="scene__petals" id="petals"></canvas>
-          <div class="scene__vignette"></div>
-        </div>
+        <div class="scene" id="scene" aria-hidden="true"></div>
 
         <div class="hero__content">
-          <p class="eyebrow" data-i18n="hero.eyebrow">Under the pale moon</p>
+          <p class="meta"><span class="meta__dot"></span><span data-i18n="hero.eyebrow">Under the pale moon</span> — <span id="roman-year"></span></p>
           <h1 class="hero__title">
             <span class="hero__title-line">Miguel</span>
             <span class="hero__title-line">Fernández</span>
           </h1>
-          <div class="divider" aria-hidden="true"><span></span><svg viewBox="0 0 24 24"><use href="#icon-rose" /></svg><span></span></div>
           <p class="hero__subtitle" data-i18n="hero.subtitle">
             Developer &amp; digital craftsman — forging things for the web, one stone at a time.
           </p>
           <div class="hero__actions">
-            <a class="btn btn--primary" href="#projects" data-i18n="hero.cta">Enter the castle</a>
+            <a class="btn btn--primary" href="#projects"><span data-i18n="hero.cta">Enter the castle</span><i aria-hidden="true">→</i></a>
             <a class="icon-link" data-link="instagram" href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-instagram" /></svg>
             </a>
@@ -193,18 +69,17 @@
 
       <!-- ======================= ABOUT ======================= -->
       <section class="section" id="about">
-        <div class="section__inner">
+        <div class="section__inner section__inner--split">
           <header class="section__head reveal">
-            <p class="kicker" data-i18n="about.kicker">Chapter I</p>
+            <p class="kicker"><span class="kicker__num">01</span><span data-i18n="about.kicker">Chapter I</span></p>
             <h2 data-i18n="about.title">The Chronicle</h2>
-            <div class="divider" aria-hidden="true"><span></span><svg viewBox="0 0 24 24"><use href="#icon-rose" /></svg><span></span></div>
           </header>
-          <div class="panel reveal">
+          <div class="prose reveal">
             <p class="dropcap" data-i18n="about.body1">
               I am Miguel, a developer who builds with the patience of a stonemason and the curiosity of a night-time
               wanderer.
             </p>
-            <p data-i18n="about.body2">This keep is still being raised.</p>
+            <p class="prose__aside" data-i18n="about.body2">This keep is still being raised.</p>
           </div>
         </div>
       </section>
@@ -212,10 +87,11 @@
       <!-- ======================= PROJECTS ======================= -->
       <section class="section section--projects" id="projects">
         <div class="section__inner">
-          <header class="section__head reveal">
-            <p class="kicker" data-i18n="projects.kicker">Chapter II</p>
-            <h2 data-i18n="projects.title">The Armory</h2>
-            <div class="divider" aria-hidden="true"><span></span><svg viewBox="0 0 24 24"><use href="#icon-rose" /></svg><span></span></div>
+          <header class="section__head section__head--row reveal">
+            <div>
+              <p class="kicker"><span class="kicker__num">02</span><span data-i18n="projects.kicker">Chapter II</span></p>
+              <h2 data-i18n="projects.title">The Armory</h2>
+            </div>
             <p class="section__lead" data-i18n="projects.lead">Works sealed in wax, waiting for their moment to be revealed.</p>
           </header>
           <ul class="projects" id="projects-grid"></ul>
@@ -226,21 +102,20 @@
       <section class="section section--contact" id="contact">
         <div class="section__inner">
           <header class="section__head reveal">
-            <p class="kicker" data-i18n="contact.kicker">Chapter III</p>
+            <p class="kicker"><span class="kicker__num">03</span><span data-i18n="contact.kicker">Chapter III</span></p>
             <h2 data-i18n="contact.title">Send a Raven</h2>
-            <div class="divider" aria-hidden="true"><span></span><svg viewBox="0 0 24 24"><use href="#icon-rose" /></svg><span></span></div>
             <p class="section__lead" data-i18n="contact.lead">Want to build something together, or just say hello?</p>
           </header>
           <div class="contact reveal">
-            <a class="contact__card" data-link="instagram" href="#" target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-instagram" /></svg>
+            <a class="contact__row" data-link="instagram" href="#" target="_blank" rel="noopener noreferrer">
               <span class="contact__label">Instagram</span>
               <span class="contact__handle">@miguelfdz014</span>
+              <span class="contact__arrow" aria-hidden="true">↗</span>
             </a>
-            <a class="contact__card" data-link="github" href="#" target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-github" /></svg>
+            <a class="contact__row" data-link="github" href="#" target="_blank" rel="noopener noreferrer">
               <span class="contact__label">GitHub</span>
               <span class="contact__handle">miguelfdz014</span>
+              <span class="contact__arrow" aria-hidden="true">↗</span>
             </a>
           </div>
         </div>
@@ -248,15 +123,12 @@
     </main>
 
     <footer class="footer">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><use href="#icon-moon" /></svg>
-      <p>© <span id="year"></span> Miguel Fernández · <span data-i18n="footer.made">Forged under moonlight</span></p>
+      <p>© <span id="year"></span> Miguel Fernández</p>
+      <p data-i18n="footer.made">Forged under moonlight</p>
     </footer>
 
     <!-- Icon sprite -->
     <svg width="0" height="0" style="position: absolute" aria-hidden="true">
-      <symbol id="icon-moon" viewBox="0 0 32 32">
-        <path fill="currentColor" d="M20.5 3.5a12.5 12.5 0 1 0 8 21.6A11 11 0 0 1 20.5 3.5Z" />
-      </symbol>
       <symbol id="icon-rose" viewBox="0 0 24 24">
         <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 4c3 0 5 2 5 4.5S15 13 12 13s-5-2-5-4.5S9 4 12 4Z" />
