@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "notices": "node scripts/notices.mjs",
     "test": "vitest run",
-    "art": "node scripts/art.mjs"
+    "art": "node scripts/art.mjs",
+    "readme-art": "node scripts/readme-art.mjs"
   },
   "devDependencies": {
     "jsdom": "^30.1.3",
