@@ -11,9 +11,11 @@
   --crimson-deep: #8b0a1f;
   --crimson-bright: #e8213f;
 
-  --font-black: 'UnifrakturCook', 'Old English Text MT', serif;
+  /* Display: Cormorant Garamond Light. Labels: Cormorant SC small caps. Body: EB Garamond. */
+  --font-display: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
   --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body: 'EB Garamond', Garamond, Georgia, serif;
+  --font-label: 'Cormorant SC', 'Cormorant Garamond', Georgia, serif;
 
   --gutter: clamp(16px, 4vw, 56px);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -28,7 +30,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* In-page links use a slow scripted glide instead (see main.js) */
   -webkit-text-size-adjust: 100%;
 }
 
@@ -36,9 +38,9 @@ body {
   margin: 0;
   background: var(--black);
   color: var(--white);
-  font-family: var(--font-serif);
-  font-size: clamp(1.1rem, 1rem + 0.45vw, 1.35rem);
-  line-height: 1.55;
+  font-family: var(--font-body);
+  font-size: clamp(1.05rem, 0.98rem + 0.35vw, 1.25rem);
+  line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -70,8 +72,8 @@ a {
   padding: 0.5rem 1rem;
   background: var(--crimson);
   color: var(--white);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-family: var(--font-label);
+  font-size: 1rem;
   text-decoration: none;
 }
 .skip-link:focus {
@@ -116,15 +118,15 @@ a {
   border-color: var(--line);
 }
 .nav__brand {
-  font-family: var(--font-black);
-  font-size: 1.6rem;
+  font-family: var(--font-label);
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   line-height: 1;
   text-decoration: none;
+  white-space: nowrap;
 }
-.nav__brand span {
-  color: var(--crimson);
-  margin: 0 0.1em;
-}
+
 .nav nav {
   margin-left: auto;
 }
@@ -139,17 +141,17 @@ a {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-family: var(--font-label);
+  font-size: 1.02rem;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   text-decoration: none;
   color: var(--bone);
   transition: color 0.25s;
 }
 .nav__num {
   color: var(--crimson);
-  font-size: 0.62rem;
+  font-size: 0.9rem;
 }
 .nav__links a:hover {
   color: var(--white);
@@ -163,8 +165,8 @@ a {
   background: transparent;
   border: 1px solid var(--line-strong);
   color: var(--mute);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-family: var(--font-label);
+  font-size: 0.98rem;
   letter-spacing: 0.1em;
   cursor: pointer;
   transition: border-color 0.25s, color 0.25s;
@@ -202,10 +204,10 @@ a {
   align-items: center;
   gap: 0.7rem;
   margin: 0 0 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-family: var(--font-label);
+  font-size: 1.02rem;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--bone);
 }
 .meta__dot {
@@ -233,11 +235,11 @@ a {
   justify-content: center;
   gap: 0.9rem;
   padding: 0.95rem 1.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-family: var(--font-label);
+  font-size: 1.02rem;
   font-weight: 500;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   text-decoration: none;
   transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
@@ -313,7 +315,7 @@ a {
 .section__head h2 {
   margin: 0;
   font-family: var(--font-serif);
-  font-weight: 500;
+  font-weight: 300;
   font-size: clamp(2.6rem, 1.4rem + 4.5vw, 5.4rem);
   line-height: 0.95;
   letter-spacing: -0.015em;
@@ -369,7 +371,7 @@ a {
 .dropcap::first-letter {
   float: left;
   margin: 0.06em 0.12em 0 0;
-  font-family: var(--font-black);
+  font-family: var(--font-display);
   font-size: 3.3em;
   line-height: 0.82;
   color: var(--crimson);
@@ -459,7 +461,7 @@ a {
   stroke-dasharray: 10 10;
 }
 .arms__charge {
-  font-family: var(--font-black);
+  font-family: var(--font-display);
   font-size: 92px;
   fill: var(--white);
 }
@@ -489,7 +491,7 @@ a {
 .arms__title {
   margin: 1.4rem 0 0.3rem;
   font-family: var(--font-serif);
-  font-weight: 500;
+  font-weight: 400;
   font-size: 1.7rem;
   line-height: 1.1;
 }
@@ -549,13 +551,13 @@ a {
 }
 .contact__label {
   font-size: clamp(2rem, 1.2rem + 4vw, 4.4rem);
-  font-weight: 500;
+  font-weight: 300;
   line-height: 1;
   letter-spacing: -0.01em;
 }
 .contact__handle {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-family: var(--font-label);
+  font-size: 1rem;
   color: var(--mute);
 }
 .contact__arrow {
@@ -588,10 +590,10 @@ a {
   gap: 0.5rem 2rem;
   padding: 2rem var(--gutter);
   border-top: 1px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-family: var(--font-label);
+  font-size: 0.98rem;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--mute);
 }
 .footer p {
@@ -611,9 +613,6 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
   *,
   *::before,
   *::after {

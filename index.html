@@ -12,10 +12,10 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Fonts load without blocking the first paint -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" /></noscript>
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
@@ -24,7 +24,7 @@
     <div class="grain" aria-hidden="true"></div>
 
     <header class="nav" id="nav">
-      <a class="nav__brand" href="#hero" aria-label="Miguel Fernández — home">M<span>·</span>F</a>
+      <a class="nav__brand" href="#hero">Miguel Fernández</a>
       <nav aria-label="Primary">
         <ul class="nav__links">
           <li><a href="#about"><span class="nav__num">01</span><span data-i18n="nav.about">About</span></a></li>
@@ -51,7 +51,7 @@
             Developer &amp; digital craftsman — forging things for the web, one stone at a time.
           </p>
           <div class="hero__actions">
-            <a class="btn btn--primary" href="#projects"><span data-i18n="hero.cta">Enter the castle</span><i aria-hidden="true">→</i></a>
+            <a class="btn btn--primary" href="#about"><span data-i18n="hero.cta">Begin the descent</span></a>
             <a class="icon-link" data-link="instagram" href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-instagram" /></svg>
             </a>

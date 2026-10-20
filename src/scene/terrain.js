@@ -1,15 +1,20 @@
 import * as THREE from 'three';
 import { fbm3 } from './noise.js';
-import { GATE_ANGLE, RAMPART_R } from './mount.js';
+import { GATE_ANGLE, RAMPART_R, GATE_DEPTH } from './mount.js';
+
+const smooth = (a, b, v) => {
+  const t = Math.min(Math.max((v - a) / (b - a), 0), 1);
+  return t * t * (3 - 2 * t);
+};
 
 // Height of the bay floor. Water sits at y=0, so anything above it is exposed sand.
+// Sand only breaks the surface near the island; further out the floor drops away.
 export function bayHeight(x, z) {
   const r = Math.hypot(x, z);
-  let h = (fbm3(x * 0.0035 + 11, z * 0.0035 - 4, 0.3, 5) - 0.5) * 4.2 - 0.55;
-  // A sandbank skirting the island
+  let h = (fbm3(x * 0.0035 + 11, z * 0.0035 - 4, 0.3, 4) - 0.5) * 4.2 - 0.55;
   h += 2.3 * Math.exp(-((r - 82) ** 2) / 700);
-  // Tidal channels
   h -= 1.2 * Math.pow(Math.abs(Math.sin(x * 0.006 + Math.sin(z * 0.004) * 2.2)), 18);
+  h -= smooth(150, 360, r) * 3.2;
   return h;
 }
 
@@ -17,9 +22,9 @@ export function buildBay({ sand, rock, rand, detail }) {
   const range = (a, b) => a + rand() * (b - a);
   const group = new THREE.Group();
 
-  // Tidal flats
-  const seg = detail ? 260 : 150;
-  const geo = new THREE.PlaneGeometry(2600, 2600, seg, seg);
+  // Tidal flats around the island (the far floor is hidden under the water anyway)
+  const seg = detail ? 220 : 130;
+  const geo = new THREE.PlaneGeometry(900, 900, seg, seg);
   geo.rotateX(-Math.PI / 2);
   const p = geo.attributes.position;
   const colors = new Float32Array(p.count * 3);
@@ -37,42 +42,27 @@ export function buildBay({ sand, rock, rand, detail }) {
   }
   geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   geo.computeVertexNormals();
-  sand.map.repeat.set(140, 140);
-  sand.normalMap.repeat.set(140, 140);
-  const flats = new THREE.Mesh(
-    geo,
-    new THREE.MeshStandardMaterial({
-      map: sand.map,
-      normalMap: sand.normalMap,
-      vertexColors: true,
-      color: 0x6a6a6a,
-      roughness: 1,
-      // Grazing views of the flats otherwise reflect the sky like snow.
-      envMapIntensity: 0.15,
-      metalness: 0,
-    }),
-  );
+  const flats = new THREE.Mesh(geo, sand);
   flats.receiveShadow = true;
   group.add(flats);
 
   // Boulders around the base of the rock
   const boulderGeo = new THREE.IcosahedronGeometry(1, 2);
   const bp = boulderGeo.attributes.position;
+  const v = new THREE.Vector3();
   for (let i = 0; i < bp.count; i++) {
-    const v = new THREE.Vector3().fromBufferAttribute(bp, i);
+    v.fromBufferAttribute(bp, i);
     v.multiplyScalar(0.75 + fbm3(v.x * 1.8, v.y * 1.8, v.z * 1.8, 3) * 0.55);
     bp.setXYZ(i, v.x, v.y, v.z);
   }
   boulderGeo.computeVertexNormals();
-  const count = 180;
-  const boulders = new THREE.InstancedMesh(
-    boulderGeo,
-    new THREE.MeshStandardMaterial({ map: rock.map, normalMap: rock.normalMap, roughness: 0.9 }),
-    count,
-  );
+  const count = 200;
+  const boulders = new THREE.InstancedMesh(boulderGeo, rock, count);
   const dummy = new THREE.Object3D();
   for (let i = 0; i < count; i++) {
-    const a = rand() * Math.PI * 2;
+    let a = rand() * Math.PI * 2;
+    // Keep the gate approach clear
+    if (Math.abs(a - GATE_ANGLE) < 0.12) a += 0.3;
     const r = range(61, 80) + (rand() < 0.2 ? range(5, 25) : 0);
     const x = Math.sin(a) * r;
     const z = Math.cos(a) * r;
@@ -86,16 +76,16 @@ export function buildBay({ sand, rock, rand, detail }) {
   boulders.castShadow = true;
   boulders.receiveShadow = true;
   group.add(boulders);
-
   return group;
 }
 
-// The raised causeway from the mainland to the gate, with lamps.
+// The raised causeway from the mainland, ending at the gatehouse doors.
 export function buildCauseway({ stone }) {
   const group = new THREE.Group();
   const dir = new THREE.Vector3(Math.sin(GATE_ANGLE), 0, Math.cos(GATE_ANGLE));
-  const start = RAMPART_R + 2;
-  const end = 1300;
+  const side = new THREE.Vector3(Math.cos(GATE_ANGLE), 0, -Math.sin(GATE_ANGLE));
+  const start = RAMPART_R + GATE_DEPTH;
+  const end = 1180;
   const len = end - start;
   const mid = dir.clone().multiplyScalar((start + end) / 2);
   const deck = new THREE.Mesh(new THREE.BoxGeometry(7, 2.4, len), stone);
@@ -103,9 +93,10 @@ export function buildCauseway({ stone }) {
   deck.rotation.y = GATE_ANGLE;
   deck.receiveShadow = true;
   group.add(deck);
-  for (const side of [-1, 1]) {
+  for (const s of [-1, 1]) {
     const wall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, len), stone);
-    wall.position.set(mid.x + Math.cos(GATE_ANGLE) * side * 3.3, 2.1, mid.z - Math.sin(GATE_ANGLE) * side * 3.3);
+    wall.position.copy(mid).addScaledVector(side, s * 3.3);
+    wall.position.y = 2.1;
     wall.rotation.y = GATE_ANGLE;
     group.add(wall);
   }
@@ -121,59 +112,105 @@ export function buildCauseway({ stone }) {
   );
   const dummy = new THREE.Object3D();
   for (let i = 0; i < n; i++) {
-    const d = start + 14 + i * 40;
-    const side = i % 2 ? 1 : -1;
-    const x = dir.x * d + Math.cos(GATE_ANGLE) * side * 3.3;
-    const z = dir.z * d - Math.sin(GATE_ANGLE) * side * 3.3;
-    dummy.position.set(x, 1.7, z);
+    const d = start + 18 + i * 40;
+    const s = i % 2 ? 1 : -1;
+    dummy.position.copy(dir).multiplyScalar(d).addScaledVector(side, s * 3.3);
+    dummy.position.y = 1.7;
     dummy.updateMatrix();
     posts.setMatrixAt(i, dummy.matrix);
-    dummy.position.set(x, 6.9, z);
+    dummy.position.y = 6.9;
     dummy.updateMatrix();
     bulbs.setMatrixAt(i, dummy.matrix);
   }
   group.add(posts, bulbs);
   // Real light only from the lamps nearest the island
   for (let i = 0; i < 2; i++) {
-    const d = start + 14 + i * 40;
     const l = new THREE.PointLight(0xffa860, 110, 30, 2);
-    l.position.set(dir.x * d, 7, dir.z * d);
+    l.position.copy(dir).multiplyScalar(start + 18 + i * 40);
+    l.position.y = 7;
     group.add(l);
   }
   return group;
 }
 
-// Low coastline around the bay with distant village lights.
-export function buildCoast({ rand }) {
+// The far shore: rolling hills, tree lines and clustered village lights all around the bay.
+export function buildHorizon({ rand, mobile }) {
   const range = (a, b) => a + rand() * (b - a);
   const group = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color: 0x15151a, roughness: 1, flatShading: true });
-  for (let i = 0; i < 46; i++) {
-    const a = (i / 46) * Math.PI * 2 + range(-0.05, 0.05);
-    const r = range(1150, 1350);
-    const geo = new THREE.ConeGeometry(1, 1, 7, 3);
-    const m = new THREE.Mesh(geo, mat);
-    const h = range(14, 46);
-    m.scale.set(range(110, 200), h, range(60, 110));
-    m.position.set(Math.sin(a) * r, h / 2 - 4, Math.cos(a) * r);
-    m.rotation.y = a + Math.PI / 2;
-    group.add(m);
+  const R0 = 950;
+  const R1 = 1650;
+  const segA = mobile ? 180 : 320;
+  const segR = 14;
+  const hill = (a, r) => {
+    const x = Math.cos(a) * 3;
+    const y = Math.sin(a) * 3;
+    const ridge = fbm3(x * 2.2, y * 2.2, r * 0.002, 5, 0, 13);
+    const rise = smooth(R0, R0 + 160, r);
+    return (ridge * ridge * 95 + 4) * rise - 6 + smooth(R1 - 300, R1, r) * 40;
+  };
+  const pos = [];
+  const idx = [];
+  for (let j = 0; j <= segR; j++) {
+    const r = R0 + ((R1 - R0) * j) / segR;
+    for (let i = 0; i <= segA; i++) {
+      const a = (i / segA) * Math.PI * 2;
+      pos.push(Math.sin(a) * r, hill(a, r), Math.cos(a) * r);
+    }
   }
-  const lights = 160;
-  const pos = new Float32Array(lights * 3);
-  for (let i = 0; i < lights; i++) {
-    const a = range(0, Math.PI * 2);
-    const r = range(1120, 1180);
-    pos[i * 3] = Math.sin(a) * r;
-    pos[i * 3 + 1] = range(1, 7);
-    pos[i * 3 + 2] = Math.cos(a) * r;
+  for (let j = 0; j < segR; j++) {
+    for (let i = 0; i < segA; i++) {
+      const p0 = j * (segA + 1) + i;
+      const p1 = p0 + segA + 1;
+      idx.push(p0, p1, p0 + 1, p0 + 1, p1, p1 + 1);
+    }
   }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x14151a, roughness: 1, side: THREE.DoubleSide })));
+
+  // Tree lines along the shore and up the slopes
+  const trees = mobile ? 1400 : 3200;
+  const forest = new THREE.InstancedMesh(
+    new THREE.ConeGeometry(1, 1, 6).translate(0, 0.5, 0),
+    new THREE.MeshStandardMaterial({ color: 0x0b0d0e, roughness: 1 }),
+    trees,
+  );
+  const dummy = new THREE.Object3D();
+  let placed = 0;
+  for (let tries = 0; placed < trees && tries < trees * 4; tries++) {
+    const a = rand() * Math.PI * 2;
+    const r = R0 + 40 + Math.pow(rand(), 1.6) * 360;
+    const h = hill(a, r);
+    if (h < 1) continue;
+    const s = range(9, 18);
+    dummy.position.set(Math.sin(a) * r, h - 1, Math.cos(a) * r);
+    dummy.scale.set(s * 0.38, s, s * 0.38);
+    dummy.updateMatrix();
+    forest.setMatrixAt(placed++, dummy.matrix);
+  }
+  forest.count = placed;
+  group.add(forest);
+
+  // Villages: little clusters of warm light near the shoreline
+  const lights = [];
+  for (let c = 0; c < 26; c++) {
+    const a = rand() * Math.PI * 2;
+    const r = R0 + range(30, 140);
+    const n = Math.floor(range(6, 22));
+    for (let k = 0; k < n; k++) {
+      const aa = a + range(-0.012, 0.012);
+      const rr = r + range(-18, 18);
+      lights.push(Math.sin(aa) * rr, Math.max(hill(aa, rr), 0) + range(1, 5), Math.cos(aa) * rr);
+    }
+  }
+  const lg = new THREE.BufferGeometry();
+  lg.setAttribute('position', new THREE.Float32BufferAttribute(lights, 3));
   group.add(
     new THREE.Points(
-      g,
-      new THREE.PointsMaterial({ color: 0xffb070, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.55, fog: false }),
+      lg,
+      new THREE.PointsMaterial({ color: 0xffb070, size: 2, sizeAttenuation: false, transparent: true, opacity: 0.7, fog: false }),
     ),
   );
   return group;

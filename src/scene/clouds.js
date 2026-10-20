@@ -1,33 +1,5 @@
 import * as THREE from 'three';
 import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
-import { fbm3, worley3 } from './noise.js';
-
-// Tileable 3D density noise: value-noise fbm blended with inverted Worley for billowy shapes.
-export function cloudNoiseTexture(n) {
-  const data = new Uint8Array(n * n * n);
-  const P = 4;
-  for (let z = 0; z < n; z++) {
-    for (let y = 0; y < n; y++) {
-      for (let x = 0; x < n; x++) {
-        const u = (x / n) * P;
-        const v = (y / n) * P;
-        const w = (z / n) * P;
-        const f = fbm3(u, v, w, 4, P, 5);
-        const c = 1 - worley3(u * 2, v * 2, w * 2, P * 2, 9);
-        data[x + y * n + z * n * n] = Math.min(255, Math.max(0, (f * 0.55 + c * 0.45) * 255));
-      }
-    }
-  }
-  const tex = new THREE.Data3DTexture(data, n, n, n);
-  tex.format = THREE.RedFormat;
-  tex.type = THREE.UnsignedByteType;
-  tex.minFilter = THREE.LinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = tex.wrapT = tex.wrapR = THREE.RepeatWrapping;
-  tex.unpackAlignment = 1;
-  tex.needsUpdate = true;
-  return tex;
-}
 
 const vertexShader = /* glsl */ `
   varying vec2 vUv;
@@ -170,9 +142,16 @@ const compositeShader = /* glsl */ `
   }
 `;
 
+function emptyVolume() {
+  const t = new THREE.Data3DTexture(new Uint8Array(1), 1, 1, 1);
+  t.format = THREE.RedFormat;
+  t.needsUpdate = true;
+  return t;
+}
+
 // Renders the scene (with depth), raymarches clouds at reduced resolution, and composites.
 export class CloudPass extends Pass {
-  constructor(scene, camera, { scale, steps, lightSteps, noise, lightDir }) {
+  constructor(scene, camera, { scale, steps, lightSteps, lightDir }) {
     super();
     this.scene = scene;
     this.camera = camera;
@@ -185,7 +164,8 @@ export class CloudPass extends Pass {
       defines: { STEPS: steps, LSTEPS: lightSteps },
       uniforms: {
         tDepth: { value: depthTexture },
-        tNoise: { value: noise },
+        // Empty volume until the real one arrives from the worker (no clouds drawn meanwhile).
+        tNoise: { value: emptyVolume() },
         projInv: { value: new THREE.Matrix4() },
         camWorld: { value: new THREE.Matrix4() },
         camPos: { value: new THREE.Vector3() },
@@ -211,6 +191,10 @@ export class CloudPass extends Pass {
     });
     this.marchQuad = new FullScreenQuad(this.march);
     this.compositeQuad = new FullScreenQuad(this.composite);
+  }
+
+  setNoise(texture) {
+    this.march.uniforms.tNoise.value = texture;
   }
 
   setSize(w, h) {

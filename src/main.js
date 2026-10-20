@@ -130,6 +130,52 @@ toggle.addEventListener('click', () => setLang(getLang() === 'en' ? 'es' : 'en')
 initLang();
 observeReveals();
 
+// ---------- Cinematic scroll for in-page links ----------
+// A slow glide so the camera's descent is actually seen; any user input takes back control.
+let glide = 0;
+function cancelGlide() {
+  cancelAnimationFrame(glide);
+  glide = 0;
+}
+['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((type) =>
+  window.addEventListener(type, () => glide && cancelGlide(), { passive: true }),
+);
+
+function glideTo(el) {
+  const vh = window.innerHeight;
+  const max = document.documentElement.scrollHeight - vh;
+  const r = el.getBoundingClientRect();
+  // Sections are framed when centred, which is where the camera reaches each stop.
+  const centred = r.top + window.scrollY + Math.min(r.height, vh * 3) / 2 - vh / 2;
+  const target = Math.max(0, Math.min(max, el.id === 'hero' ? 0 : centred));
+  const from = window.scrollY;
+  const dist = Math.abs(target - from);
+  if (reducedMotion || dist < 4) {
+    window.scrollTo({ top: target, behavior: 'instant' });
+    return;
+  }
+  const duration = Math.min(Math.max((dist / vh) * 1800, 1400), 9000);
+  const t0 = performance.now();
+  cancelGlide();
+  const step = (now) => {
+    const p = Math.min((now - t0) / duration, 1);
+    const e = 0.5 - Math.cos(Math.PI * p) / 2; // ease in and out
+    window.scrollTo({ top: from + (target - from) * e, behavior: 'instant' });
+    glide = p < 1 ? requestAnimationFrame(step) : 0;
+  };
+  glide = requestAnimationFrame(step);
+}
+
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a || a.classList.contains('skip-link')) return;
+  const el = document.querySelector(a.getAttribute('href'));
+  if (!el) return;
+  e.preventDefault();
+  glideTo(el);
+  history.replaceState(null, '', a.getAttribute('href'));
+});
+
 // ---------- Nav state ----------
 const nav = document.getElementById('nav');
 const onScrollNav = () => nav.classList.toggle('is-scrolled', window.scrollY > 40);
