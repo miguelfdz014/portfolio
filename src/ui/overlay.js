@@ -1,7 +1,7 @@
 // Real HTML controls laid over the painted art. Each `[data-art="layerIndex,u,v"]` child of `root` is placed on
 // that point of the stage's layer. When the stage is off screen the controls are hidden but stay in the tab
 // order: focusing one glides the page to its section, so keyboard focus never lands on something invisible.
-import { artToScreen } from '../scene/layout.js';
+import { artToScreen, coverRect, LANDSCAPE_ASPECT, PORTRAIT_ASPECT } from '../scene/layout.js';
 
 export function mountOverlay(root, stageId, getRect, glideTo) {
   const section = root.closest('section');
@@ -24,9 +24,10 @@ export function mountOverlay(root, stageId, getRect, glideTo) {
       if (base?.w) root.style.setProperty('--art-w', `${Math.round((base.w / W) * viewport.width)}px`);
       for (const el of spots()) {
         const [layer, u, v] = el.dataset.art.split(',').map(Number);
-        // Before the stage has been laid out, assume a 16:9 painting covering the view (every stage starts so).
+        // Before the stage has been laid out, assume its painting covers the view (16:9, or portrait on upright
+        // screens, where W < 2).
         const laidOut = getRect(layer);
-        const rect = laidOut?.w ? laidOut : { x: 0, y: 0, w: Math.max(W, 32 / 9), h: Math.max(W, 32 / 9) * (9 / 16) };
+        const rect = laidOut?.w ? laidOut : coverRect(W, W < 2 ? PORTRAIT_ASPECT : LANDSCAPE_ASPECT);
         const { left, top } = artToScreen(u, v, rect, W, viewport);
         el.style.left = `${Math.round(left)}px`;
         el.style.top = `${Math.round(top)}px`;

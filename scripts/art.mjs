@@ -12,7 +12,8 @@ const LANDSCAPE = /(sky|moon|clouds|castle|forest|trees|roses)-1280/;
 
 async function writeVariants(input, outDir, layer) {
   const names = variantNames(layer);
-  for (const [width, name] of [[2560, names.desktop], [1280, names.mobile]]) {
+  const sizes = names.portrait ? [[1280, names.portrait]] : [[2560, names.desktop], [1280, names.mobile]];
+  for (const [width, name] of sizes) {
     await sharp(input).resize({ width, withoutEnlargement: true }).webp({ quality: 82 }).toFile(path.join(outDir, name));
   }
 }
@@ -59,7 +60,9 @@ function checkBudget(distDir) {
   const rows = budget(walk(distDir), [
     { name: 'before hero (js + css + landscape 1280)', match: (p) => /\.(js|css)$/.test(p) || LANDSCAPE.test(p), max: 1.5 * MB },
     { name: 'all art (2560 webp)', match: (p) => /-2560[^/]*\.webp$/.test(p), max: 8 * MB },
-    { name: 'library video', match: (p) => p.endsWith('.mp4'), max: 4 * MB },
+    { name: 'portrait art (webp)', match: (p) => /-portrait-1280[^/]*\.webp$/.test(p), max: 3 * MB },
+    { name: 'music', match: (p) => p.endsWith('.m4a'), max: 1.6 * MB },
+    { name: 'library videos', match: (p) => p.endsWith('.mp4'), max: 7 * MB },
   ]);
   for (const r of rows) console.log(`${r.ok ? 'ok  ' : 'FAIL'} ${r.name}: ${(r.bytes / MB).toFixed(2)} / ${(r.max / MB).toFixed(1)} MB`);
   if (rows.some((r) => !r.ok)) process.exit(1);

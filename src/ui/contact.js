@@ -1,20 +1,19 @@
 // Contact: Miguel's links written on the parchment on the desk. Hovering one perks the raven up; clicking opens the
 // link straight away (never delayed) while the raven carries a sealed letter off toward the moon.
-import hotspots from '../art/hotspots.json';
-
-const [u, v] = hotspots.desk.parchment;
+import { hotspotsFor } from '../scene/hotspots.js';
 
 const LINKS = [
   ['instagram', 'Instagram', '@miguelfdz014'],
   ['github', 'GitHub', 'miguelfdz014'],
 ];
 
-export function renderContact(root, { links, t, raven, reducedMotion }) {
+export function renderContact(root, { links, t, raven, reducedMotion, orient = 'landscape' }) {
+  const [u, v] = hotspotsFor('desk', orient).parchment;
   root.replaceChildren();
-  // The links sit in the parchment's top third, leaving room below for a real form later.
+  // The links are written where the parchment hotspot says (the middle of the paper's writing area).
   const letter = document.createElement('div');
   letter.className = 'letter';
-  letter.dataset.art = `0,${u + 0.07},${v - 0.04}`;
+  letter.dataset.art = `0,${u},${v}`;
   const seal = document.createElement('span');
   seal.className = 'letter__seal';
   seal.setAttribute('aria-hidden', 'true');

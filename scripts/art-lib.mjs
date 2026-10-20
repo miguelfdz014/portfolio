@@ -47,7 +47,11 @@ export function findMoon(rgba, width, height, region = { x0: 0, y0: 0, x1: width
   };
 }
 
-export const variantNames = (layer) => ({ desktop: `${layer}-2560.webp`, mobile: `${layer}-1280.webp` });
+// 16:9 paintings ship at two widths; tall portrait paintings (layer names ending in -portrait) only at phone size.
+export const variantNames = (layer) =>
+  layer.endsWith('-portrait')
+    ? { portrait: `${layer}-1280.webp` }
+    : { desktop: `${layer}-2560.webp`, mobile: `${layer}-1280.webp` };
 
 export function budget(files, limits) {
   return limits.map(({ name, match, max }) => {

@@ -1,21 +1,19 @@
-// Stage 2: the tower library (About). The whole painting is a Higgsfield video loop with a fixed camera, so the
-// HTML hotspots over the book, scrolls and hobby objects stay aligned; candles glow and dust drifts on top.
-import hotspots from '../../art/hotspots.json';
+// Stage 2: the tower library (About). The whole painting is a Higgsfield video loop with a fixed camera (a tall one
+// for upright phones), so the HTML hotspots over the book, scrolls and hobby objects stay aligned; candles glow and dust drifts on top.
+import { hotspotsFor } from '../hotspots.js';
+import { LANDSCAPE_ASPECT, coverRect, stageAspect } from '../layout.js';
 
-const ASPECT = 16 / 9;
 const art = (name) => ({
   desktop: new URL(`../../art/library/${name}-2560.webp`, import.meta.url).href,
   mobile: new URL(`../../art/library/${name}-1280.webp`, import.meta.url).href,
 });
 
 // The painting always covers the view (cropping its sides on narrow screens, its top and bottom on wide ones).
-export function libraryRect(W) {
-  const w = Math.max(W, 2 * ASPECT);
-  return { x: 0, y: 0, w, h: w / ASPECT };
-}
+export const libraryRect = (W, orient) => coverRect(W, stageAspect(orient));
 
-const at = ([u, v], W) => {
-  const r = libraryRect(W);
+const at = (key, i, W, orient) => {
+  const r = libraryRect(W, orient);
+  const [u, v] = hotspotsFor('library', orient)[key][i];
   return { x: (u - 0.5) * r.w, y: (0.5 - v) * r.h };
 };
 
@@ -23,9 +21,10 @@ const P = 0.04; // A hint of mouse parallax; the scene itself is a locked-off sh
 
 export const shouldPlayVideo = ({ stage, motionOn, reducedMotion }) => stage === 'library' && motionOn && !reducedMotion;
 
-const L = hotspots.library;
+// Dust drifts in the 16:9 painting's moonbeam (the motes' area is fixed when the stage is built).
+const L = hotspotsFor('library', 'landscape');
 const [bx0, by0, bx1, by1] = L.moonbeam;
-const ref = libraryRect(2 * ASPECT);
+const ref = libraryRect(2 * LANDSCAPE_ASPECT, 'landscape');
 
 export const libraryDef = {
   id: 'library',
@@ -33,16 +32,19 @@ export const libraryDef = {
   layers: [
     {
       kind: 'video',
-      src: art('poster'),
-      video: new URL('../../art/library/loop.mp4', import.meta.url).href,
+      src: { ...art('poster'), portrait: new URL('../../art/library/poster-portrait-1280.webp', import.meta.url).href },
+      video: {
+        landscape: new URL('../../art/library/loop.mp4', import.meta.url).href,
+        portrait: new URL('../../art/library/loop-portrait.mp4', import.meta.url).href,
+      },
       p: P,
-      layout: (W) => libraryRect(W),
+      layout: (W, t, s, orient) => libraryRect(W, orient),
     },
-    ...L.candles.map((c) => ({
+    ...L.candles.map((_, i) => ({
       kind: 'glow',
       p: P,
       opts: { color: [1, 0.62, 0.28], flicker: true, strength: 0.22 },
-      layout: (W) => ({ ...at(c, W), w: 0.55, h: 0.55 }),
+      layout: (W, t, s, orient) => ({ ...at('candles', i, W, orient), w: 0.55, h: 0.55 }),
     })),
     {
       kind: 'motes',

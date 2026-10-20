@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { mistAt, stageFrame } from './director.js';
 import { mistMaterial } from './materials.js';
+import { orientation } from './orient.js';
 import { createStage } from './stage.js';
 import { landscapeDef } from './stages/landscape.js';
 import { boardDef } from './stages/board.js';
@@ -33,7 +34,7 @@ export function startWorld(container, { reducedMotion, overlays = new Map() }) {
   function stage(id) {
     const key = DEFS[id] ? id : 'landscape';
     if (!stages.has(key)) {
-      const st = createStage(DEFS[key], { loader });
+      const st = createStage(DEFS[key], { loader, orient });
       stages.set(key, st);
       st.ready.then(() => {
         if (key === 'landscape') container.classList.add('is-ready');
@@ -72,12 +73,18 @@ export function startWorld(container, { reducedMotion, overlays = new Map() }) {
   }
 
   let W = 2;
+  let orient = 'landscape';
   const viewport = { width: 1, height: 1 };
   function resize() {
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     viewport.width = window.innerWidth;
     viewport.height = window.innerHeight;
     W = 2 * (viewport.width / viewport.height);
+    const next = orientation(viewport);
+    if (next !== orient) {
+      orient = next;
+      for (const st of stages.values()) st.setOrientation(orient);
+    }
     Object.assign(camera, { left: -W / 2, right: W / 2, top: 1, bottom: -1 });
     camera.updateProjectionMatrix();
     veil.scale.set(W, 2, 1);

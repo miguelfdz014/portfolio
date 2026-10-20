@@ -20,15 +20,15 @@
     <div class="grain" aria-hidden="true"></div>
 
     <header class="nav" id="nav">
-      <a class="nav__brand" href="#hero">Miguel Fernández</a>
       <nav aria-label="Primary">
         <ul class="nav__links">
-          <li><a href="#about"><span class="nav__num">01</span><span data-i18n="nav.about">About</span></a></li>
-          <li><a href="#projects"><span class="nav__num">02</span><span data-i18n="nav.projects">Projects</span></a></li>
-          <li><a href="#contact"><span class="nav__num">03</span><span data-i18n="nav.contact">Contact</span></a></li>
+          <li><a href="#about"><span data-i18n="nav.about">About</span></a></li>
+          <li><a href="#projects"><span data-i18n="nav.projects">Projects</span></a></li>
+          <li><a href="#contact"><span data-i18n="nav.contact">Contact</span></a></li>
         </ul>
       </nav>
       <button class="nav-toggle" id="motion-toggle" type="button" hidden>Pause motion</button>
+      <button class="nav-toggle" id="sound-toggle" type="button" aria-pressed="false">Sound off</button>
       <button class="lang-toggle" id="lang-toggle" type="button" data-i18n-aria="lang.label" aria-label="EN/ES, switch language">
         <span data-lang="en">EN</span><span class="lang-toggle__sep">/</span><span data-lang="es">ES</span>
       </button>
@@ -72,12 +72,14 @@
       <!-- ======================= ABOUT ======================= -->
       <section class="section" id="about" data-cam data-stage="library">
         <div class="section__inner section__inner--split">
+          <div class="panel">
           <header class="section__head reveal">
             <p class="kicker"><span class="kicker__num">01</span><span data-i18n="about.kicker">Chapter I</span></p>
             <h2 data-i18n="about.title">The Chronicle</h2>
           </header>
           <p class="dropcap reveal" data-i18n="about.body1">My name is Miguel. I build for the web as a software developer.</p>
           <p class="prose__aside reveal" data-i18n="about.body2">Away from the keyboard: weightlifting, World of Warcraft and black-and-white photography.</p>
+          </div>
         </div>
         <!-- Book, certification scrolls and hobby spots over the library painting (src/ui/about.js) -->
         <div class="stage-ui" data-stage="library"></div>
@@ -86,6 +88,7 @@
       <!-- ======================= PROJECTS ======================= -->
       <section class="section section--projects" id="projects" data-cam data-stage="board">
         <div class="section__inner">
+          <div class="panel">
           <header class="section__head section__head--row reveal">
             <div>
               <p class="kicker"><span class="kicker__num">02</span><span data-i18n="projects.kicker">Chapter II</span></p>
@@ -93,6 +96,7 @@
             </div>
             <p class="section__lead" data-i18n="projects.lead">Works sealed in wax, waiting for their moment to be revealed.</p>
           </header>
+          </div>
         </div>
         <!-- Parchments pinned to the painted quest board (src/ui/board.js) -->
         <div class="stage-ui" data-stage="board"></div>
@@ -101,11 +105,13 @@
       <!-- ======================= CONTACT ======================= -->
       <section class="section section--contact" id="contact" data-cam data-stage="desk">
         <div class="section__inner">
+          <div class="panel">
           <header class="section__head reveal">
             <p class="kicker"><span class="kicker__num">03</span><span data-i18n="contact.kicker">Chapter III</span></p>
             <h2 data-i18n="contact.title">Send a Raven</h2>
             <p class="section__lead" data-i18n="contact.lead">Want to build something together, or just say hello?</p>
           </header>
+          </div>
         </div>
         <!-- Links written on the parchment on the desk; the raven flies off with a letter (src/ui/contact.js) -->
         <div class="stage-ui" data-stage="desk"></div>
@@ -124,7 +130,7 @@
     <dialog class="privacy" id="privacy" aria-labelledby="privacy-title">
       <h2 id="privacy-title" data-i18n="privacy.title">Privacy</h2>
       <p data-i18n="privacy.p1">This site doesn't use cookies, analytics or trackers, and it doesn't collect any personal data.</p>
-      <p data-i18n="privacy.p2">Your language and motion choices are saved only in your own browser and never leave your device.</p>
+      <p data-i18n="privacy.p2">Your language, motion and sound choices are saved only in your own browser and never leave your device.</p>
       <p>
         <span data-i18n="privacy.p3">The site is hosted on Cloudflare Pages, which processes technical data such as your IP address to deliver the page and protect it from abuse.</span>
         <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" data-i18n="privacy.cloudflare">Cloudflare's privacy policy</a>

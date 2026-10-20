@@ -10,21 +10,45 @@ const QUAD = new THREE.PlaneGeometry(1, 1);
 const EMPTY = new THREE.DataTexture(new Uint8Array(4), 1, 1);
 EMPTY.needsUpdate = true;
 
-const pickSrc = (src) => (window.innerWidth * (window.devicePixelRatio || 1) <= 1600 ? src.mobile : src.desktop);
+// Which file of a painting to load: the portrait version on upright screens (when the painting has one), else the
+// 16:9 painting at a size that suits the screen's pixel width.
+export function pickSrc(src, { orient, wide }) {
+  if (orient === 'portrait' && src.portrait) return src.portrait;
+  return wide ? src.desktop : src.mobile;
+}
+// The layout a stage uses: its portrait one only when its painting has a portrait version that actually loaded,
+// so a missing portrait painting is shown at its own 16:9 shape instead of squeezed.
+export const artOrientation = (orient, src, portraitMissing) =>
+  orient === 'portrait' && src?.portrait && !portraitMissing ? 'portrait' : 'landscape';
 
-function loadTexture(loader, src) {
+const isWide = () => window.innerWidth * (window.devicePixelRatio || 1) > 1600;
+
+function loadUrl(loader, url) {
   return new Promise((resolve) => {
     loader.load(
-      pickSrc(src),
+      url,
       (tex) => {
         tex.anisotropy = 8;
         resolve(tex);
       },
       undefined,
-      () => resolve(EMPTY), // A missing painting leaves a gap, never a broken page.
+      () => resolve(null),
     );
   });
 }
+
+// A missing portrait painting falls back to the 16:9 one; a missing painting leaves a gap, never a broken page.
+async function loadTexture(loader, src, orient, onPortraitMissing) {
+  const url = pickSrc(src, { orient, wide: isWide() });
+  const tex = await loadUrl(loader, url);
+  if (tex) return tex;
+  if (url !== src.portrait) return EMPTY;
+  onPortraitMissing?.();
+  return (await loadUrl(loader, pickSrc(src, { orient: 'landscape', wide: isWide() }))) ?? EMPTY;
+}
+
+// A video source is a URL, or { landscape, portrait } URLs.
+const videoUrl = (v, orient) => (typeof v === 'string' ? v : (orient === 'portrait' && v.portrait) || v.landscape);
 
 function createVideo(url) {
   const video = Object.assign(document.createElement('video'), { muted: true, loop: true, playsInline: true, preload: 'none' });
@@ -33,7 +57,12 @@ function createVideo(url) {
   return video;
 }
 
-export function createStage(def, { loader }) {
+export function createStage(def, { loader, orient: startOrient = 'landscape' }) {
+  let orient = startOrient;
+  // The base painting (layer 0) decides the stage's layout; set when its portrait file fails to load.
+  let portraitMissing = false;
+  const missing = (i) => (i === 0 ? () => (portraitMissing = true) : undefined);
+  const layoutOrient = () => artOrientation(orient, def.layers[0].src, portraitMissing);
   const scene = new THREE.Scene();
   const uniforms = { time: { value: 0 }, fade: { value: 1 } };
   const travel = def.travel ?? 0;
@@ -58,16 +87,17 @@ export function createStage(def, { loader }) {
           const mat = material;
           L.textures = {};
           for (const [name, src] of Object.entries(L.frames)) {
-            loads.push(loadTexture(loader, src).then((tex) => {
+            loads.push(loadTexture(loader, src, orient).then((tex) => {
               L.textures[name] = tex;
               if (mat.uniforms.map.value === EMPTY) mat.uniforms.map.value = tex;
             }));
           }
-        } else loads.push(loadTexture(loader, L.src).then((tex) => (material.uniforms.map.value = tex)));
+        } else loads.push(loadTexture(loader, L.src, orient, missing(i)).then((tex) => (material.uniforms.map.value = tex)));
         if (L.kind === 'video') {
-          video = createVideo(L.video);
+          video = createVideo(videoUrl(L.video, orient));
           const vtex = new THREE.VideoTexture(video);
-          video.addEventListener('playing', () => (material.uniforms.map.value = vtex), { once: true });
+          // The poster shows until the loop is actually playing (again after a switch to the other painting).
+          video.addEventListener('playing', () => (material.uniforms.map.value = vtex));
         }
       }
       object = new THREE.Mesh(QUAD, material);
@@ -89,7 +119,7 @@ export function createStage(def, { loader }) {
         const u = layer.object.material.uniforms;
         if (u.halfW) u.halfW.value = W / 2;
         if (!layer.def.layout) continue;
-        const f = layer.def.layout(W, t, s);
+        const f = layer.def.layout(W, t, s, layoutOrient());
         const { dx, dy } = parallax({ p: layer.def.p, travel, s, mx, my });
         layer.rect = { x: f.x + dx, y: f.y + dy, w: f.w, h: f.h };
         layer.object.position.set(layer.rect.x, layer.rect.y, 0);
@@ -100,6 +130,34 @@ export function createStage(def, { loader }) {
       }
     },
     rect: (i) => layers[i]?.rect ?? { x: 0, y: 0, w: 0, h: 0 },
+    // Switch between the 16:9 and portrait paintings: reload every painting that has a portrait version.
+    setOrientation(next) {
+      if (next === orient) return;
+      orient = next;
+      layers.forEach(({ def: L, object }, i) => {
+        if (!L.src?.portrait) return;
+        const mat = object.material;
+        // A loop switching to the other clip shows the new poster until that clip plays (the 'playing' listener
+        // swaps the video back in), never a stretched last frame of the old clip.
+        const videoSwitch = L.kind === 'video' && video && !video.src.endsWith(videoUrl(L.video, orient));
+        loadTexture(loader, L.src, orient, missing(i)).then((tex) => {
+          if (orient !== next) return tex !== EMPTY && tex.dispose?.();
+          if (L.kind === 'video' && video && !video.paused && !videoSwitch) return tex !== EMPTY && tex.dispose?.();
+          const old = mat.uniforms.map.value;
+          mat.uniforms.map.value = tex;
+          if (old !== EMPTY && !(old instanceof THREE.VideoTexture)) old.dispose?.();
+        });
+        if (L.kind === 'video' && video) {
+          const url = videoUrl(L.video, orient);
+          if (!video.src.endsWith(url)) {
+            const playing = videoOn;
+            video.src = url;
+            videoOn = false;
+            if (playing) this.setVideoPlaying(true);
+          }
+        }
+      });
+    },
     setVideoPlaying(on) {
       if (!video || on === videoOn) return;
       videoOn = on;

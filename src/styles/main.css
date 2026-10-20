@@ -41,7 +41,7 @@ body {
   background: var(--black);
   color: var(--white);
   font-family: var(--font-body);
-  font-size: clamp(1.05rem, 0.98rem + 0.35vw, 1.25rem);
+  font-size: clamp(1.12rem, 1.02rem + 0.4vw, 1.32rem);
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -124,15 +124,6 @@ a {
   -webkit-backdrop-filter: blur(10px);
   border-color: var(--line);
 }
-.nav__brand {
-  font-family: var(--font-label);
-  font-size: 1.2rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  line-height: 1;
-  text-decoration: none;
-  white-space: nowrap;
-}
 
 .nav nav {
   margin-left: auto;
@@ -156,10 +147,6 @@ a {
   color: var(--bone);
   transition: color 0.25s;
 }
-.nav__num {
-  color: var(--crimson-text);
-  font-size: 0.9rem;
-}
 .nav__links a:hover {
   color: var(--white);
 }
@@ -173,6 +160,7 @@ a {
   font-size: 0.98rem;
   letter-spacing: 0.1em;
   text-transform: lowercase;
+  white-space: nowrap;
   cursor: pointer;
   transition: border-color 0.25s, color 0.25s;
 }
@@ -220,8 +208,17 @@ a {
 }
 
 @media (max-width: 640px) {
+  .nav {
+    gap: 0.5rem;
+  }
   .nav__links {
     display: none;
+  }
+  .nav-toggle,
+  .lang-toggle {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
   }
   .lang-toggle {
     margin-left: auto;
@@ -361,8 +358,7 @@ a {
 .section__lead {
   max-width: 26rem;
   margin: 1rem 0 0;
-  color: var(--mute);
-  font-style: italic;
+  color: var(--bone);
 }
 .section__head--row .section__lead {
   margin: 0;
@@ -395,9 +391,8 @@ a {
 }
 .prose__aside {
   margin-bottom: 0 !important;
-  color: var(--mute);
-  font-style: italic;
-  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem) !important;
+  color: var(--bone);
+  font-size: clamp(1.08rem, 1rem + 0.3vw, 1.22rem) !important;
 }
 .dropcap::first-letter {
   float: left;
