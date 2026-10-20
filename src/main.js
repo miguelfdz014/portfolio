@@ -32,63 +32,63 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
+// Heater-shield outline, viewBox 0 0 200 240.
+const SHIELD = 'M12 8H188V104C188 168 148 210 100 232C52 210 12 168 12 104Z';
+const DIVISIONS = {
+  plain: '',
+  pale: '<path class="arms__division" d="M100 8V232" />',
+  chevron: '<path class="arms__division" d="M14 196L100 104L186 196" />',
+  bend: '<path class="arms__division" d="M12 8L188 200" />',
+};
+
+function shieldSvg(p, i) {
+  const id = `arms-clip-${i}`;
+  const ready = p.status === 'ready';
+  // A finished project carries its initial as the charge; a blank one shows an empty inescutcheon.
+  const charge = ready
+    ? `<text class="arms__charge" x="100" y="146" text-anchor="middle">${escapeHtml(String(localize(p.title) ?? '?').charAt(0))}</text>`
+    : `<path class="arms__empty" d="${SHIELD}" transform="translate(100 118) scale(0.3) translate(-100 -120)" />`;
+  return `
+    <svg class="arms__shield" viewBox="0 0 200 240" aria-hidden="true">
+      <defs><clipPath id="${id}"><path d="${SHIELD}" /></clipPath></defs>
+      <g clip-path="url(#${id})">
+        <rect width="200" height="240" fill="#050506" />
+        <rect width="200" height="240" fill="url(#hatch-sable)" />
+        <rect class="arms__gules" width="200" height="240" fill="url(#hatch-gules)" />
+        ${DIVISIONS[p.division] ?? ''}
+        ${charge}
+      </g>
+      <path class="arms__edge" d="${SHIELD}" />
+      <path class="arms__edge arms__edge--inner" d="${SHIELD}" transform="translate(100 120) scale(0.92) translate(-100 -120)" />
+    </svg>`;
+}
+
 function renderProjects() {
   grid.innerHTML = projects
     .map((p, i) => {
       const delay = `style="--delay:${i * 120}ms"`;
-      const num = escapeHtml(p.numeral ?? '');
       if (p.status !== 'ready') {
         return `
-          <li class="card card--sealed reveal" ${delay}>
-            <div class="card__top"><span>Nº ${num}</span><span class="card__badge">${escapeHtml(t('projects.sealed'))}</span></div>
-            <div class="card__seal" aria-hidden="true">
-              <svg viewBox="0 0 64 64"><use href="#icon-seal" /></svg>
-              <svg class="card__seal-rose" viewBox="0 0 24 24"><use href="#icon-rose" /></svg>
-            </div>
-            <div class="card__bottom">
-              <h3 class="card__title">${escapeHtml(t('projects.incoming'))}</h3>
-              <p class="card__body">${escapeHtml(t('projects.incomingBody'))}</p>
-            </div>
+          <li class="arms arms--blank reveal" ${delay}>
+            <div class="arms__hang">${shieldSvg(p, i)}</div>
+            <h3 class="arms__title">${escapeHtml(t('projects.incoming'))}</h3>
+            <p class="arms__blazon">${escapeHtml(t(`blazon.${p.division ?? 'plain'}`))}</p>
+            <p class="arms__note">${escapeHtml(t('projects.status'))}</p>
           </li>`;
       }
-      const tags = (p.tags ?? []).map((tag) => `<li>${escapeHtml(tag)}</li>`).join('');
+      const tags = (p.tags ?? []).map(escapeHtml).join(', ');
       return `
-        <li class="card reveal" ${delay}>
-          <div class="card__top"><span>Nº ${num}</span></div>
-          <div class="card__bottom" style="margin-top:auto">
-            <h3 class="card__title">${escapeHtml(localize(p.title))}</h3>
-            <p class="card__body">${escapeHtml(localize(p.description))}</p>
-            ${tags ? `<ul class="card__tags">${tags}</ul>` : ''}
-            ${p.url ? `<a class="btn btn--ghost" href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('projects.view'))} <i aria-hidden="true">↗</i></a>` : ''}
-          </div>
+        <li class="arms reveal" ${delay}>
+          <a class="arms__link" href="${escapeHtml(p.url ?? site.links.github)}" target="_blank" rel="noopener noreferrer">
+            <div class="arms__hang">${shieldSvg(p, i)}</div>
+            <h3 class="arms__title">${escapeHtml(localize(p.title))}</h3>
+          </a>
+          <p class="arms__blazon">${escapeHtml(localize(p.description))}</p>
+          ${tags ? `<p class="arms__note">${tags}</p>` : ''}
         </li>`;
     })
     .join('');
   observeReveals(grid);
-}
-
-// 3D tilt toward the pointer
-if (!reducedMotion) {
-  grid.addEventListener('pointermove', (e) => {
-    const card = e.target.closest('.card');
-    if (!card || e.pointerType !== 'mouse') return;
-    const r = card.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    card.style.setProperty('--ry', `${(px * 12).toFixed(2)}deg`);
-    card.style.setProperty('--rx', `${(-py * 12).toFixed(2)}deg`);
-  });
-  grid.addEventListener(
-    'pointerleave',
-    (e) => {
-      const card = e.target.closest?.('.card');
-      if (card) {
-        card.style.setProperty('--rx', '0deg');
-        card.style.setProperty('--ry', '0deg');
-      }
-    },
-    true,
-  );
 }
 
 // ---------- Reveal on scroll ----------

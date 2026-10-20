@@ -13,10 +13,10 @@ npm run preview   # serve the built site
 
 ## Editing content
 
-- **Name, links, projects:** `src/config.js`. To publish a project, change its `status` to `'ready'` and add `title`, `description`, `tags` and `url` (see the commented example in the file).
+- **Name, links, projects:** `src/config.js`. Each project is a heraldic shield in the Armory. To publish one, change its `status` to `'ready'` and add `title`, `description`, `tags` and `url` (see the commented example in the file).
 - **Text in both languages:** `src/i18n.js`.
 - **Colors and fonts:** the variables at the top of `src/styles/main.css`.
-- **Hero scene (moon, castle, fog):** `index.html` (markup) and `src/styles/scene.css`.
+- **3D scene:** `src/scene/` — `world.js` (camera path, lights, water, moon), `mount.js` (Mont-Saint-Michel), `terrain.js` (bay, causeway, coast), `clouds.js` (volumetric clouds), `textures.js` (generated textures).
 
 ## Deploy to Cloudflare Pages
 
