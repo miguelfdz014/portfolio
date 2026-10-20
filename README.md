@@ -9,6 +9,8 @@ to Mont-Saint-Michel rising from a moonlit bay, all rendered live in your browse
 
 ![The opening view: a full moon over a sea of volumetric clouds](docs/hero.jpg)
 
+**[Visit the site →](https://miguelfdzportfolio.pages.dev/)**
+
 [GitHub](https://github.com/miguelfdz014) · [Instagram](https://www.instagram.com/miguelfdz014/)
 
 </div>
