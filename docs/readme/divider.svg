@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 40" width="1200" height="40" role="img" aria-label="Divider">
+<title>Divider</title>
+<defs><style>
+@keyframes glow{0%,100%{opacity:.6}40%{opacity:1}70%{opacity:.8}}
+@keyframes tw{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes drift{from{transform:translateX(-10px)}to{transform:translateX(10px)}}
+@keyframes flap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(-.6)}}
+@keyframes flick{0%,100%{transform:scale(1,1)}30%{transform:scale(.92,1.08)}60%{transform:scale(1.05,.95)}}
+@keyframes fall{0%{transform:translate(0,0) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate(-120px,260px) rotate(480deg);opacity:0}}
+@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+.win{animation:glow 2.8s ease-in-out infinite}
+.tw{animation:tw 3.4s ease-in-out infinite}
+.drift{animation:drift 14s ease-in-out infinite alternate}
+.wing{animation:flap .5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.flame{animation:flick 1.3s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.petal{animation:fall 10s linear infinite;transform-box:fill-box;transform-origin:center}
+.sway{animation:sway 4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}
+.sketch *{fill:none!important;stroke:#6b5a48!important;stroke-width:1px!important;animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}</style>
+
+<radialGradient id="puffCloud"><stop offset=".35" stop-color="#141d36"/><stop offset="1" stop-color="#141d36" stop-opacity="0"/></radialGradient>
+<radialGradient id="puffMist"><stop offset=".2" stop-color="#dfe7f5"/><stop offset="1" stop-color="#dfe7f5" stop-opacity="0"/></radialGradient>
+<radialGradient id="puffLit"><stop offset=".2" stop-color="#5d6a8c"/><stop offset="1" stop-color="#5d6a8c" stop-opacity="0"/></radialGradient>
+<radialGradient id="age" cx="50%" cy="50%" r="70%"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a1a0c" stop-opacity=".35"/></radialGradient>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#08112a"/><stop offset="1" stop-color="#1c2c55"/></linearGradient>
+<radialGradient id="halo"><stop offset=".6" stop-color="#eef2f8" stop-opacity=".35"/><stop offset="1" stop-color="#eef2f8" stop-opacity="0"/></radialGradient>
+<radialGradient id="warm"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".55"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/></radialGradient>
+<symbol id="rose" viewBox="0 0 60 60">
+  <path d="M10 44 Q18 34 30 40 Q22 50 10 44Z" fill="#050506"/><path d="M50 46 Q42 36 31 42 Q38 52 50 46Z" fill="#050506"/>
+  <circle cx="30" cy="28" r="16" fill="#8b0a1f"/>
+  <path d="M16 28 Q16 14 30 13 Q44 14 44 28 Q38 20 30 21 Q22 20 16 28Z" fill="#c8102e"/>
+  <path d="M20 31 Q22 21 30 22 Q38 22 40 31 Q35 26 30 27 Q24 26 20 31Z" fill="#c8102e"/>
+  <path d="M24 30 Q26 24 30 25 Q34 24 36 30 Q30 27 24 30Z" fill="#8b0a1f"/>
+  <path d="M18 34 Q30 46 42 34 Q36 42 30 42 Q24 42 18 34Z" fill="#c8102e"/></symbol>
+<symbol id="raven" viewBox="0 0 60 30"><path d="M22 16 Q30 12 40 15 L48 13 L44 17 Q36 21 26 20Z"/>
+  <path class="wing" d="M28 16 Q20 2 6 4 Q18 8 24 18Z"/><path class="wing" d="M32 16 Q42 2 56 6 Q44 9 36 18Z"/></symbol>
+</defs>
+<g stroke="#c8102e" stroke-width="1.2" opacity=".85"><path d="M140 20 H545 M655 20 H1060"/></g>
+  <g fill="#8a8780"><circle cx="140" cy="20" r="2.5"/><circle cx="1060" cy="20" r="2.5"/><circle cx="520" cy="20" r="1.8"/><circle cx="680" cy="20" r="1.8"/></g>
+  <use href="#rose" x="548" y="4" width="30" height="30"/><use href="#rose" x="622" y="4" width="30" height="30"/>
+  <path d="M600 6 L612 20 L600 34 L588 20Z" fill="#c8102e"/><path d="M600 12 L606 20 L600 28 L594 20Z" fill="#efe8da" opacity=".8"/>
+</svg>
