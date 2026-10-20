@@ -1,3 +1,14 @@
+// Fonts are self-hosted (no requests to Google): Latin subsets only, which cover English and Spanish.
+import '@fontsource/cormorant-garamond/latin-300.css';
+import '@fontsource/cormorant-garamond/latin-400.css';
+import '@fontsource/cormorant-garamond/latin-500.css';
+import '@fontsource/cormorant-garamond/latin-300-italic.css';
+import '@fontsource/cormorant-garamond/latin-400-italic.css';
+import '@fontsource/cormorant-sc/latin-400.css';
+import '@fontsource/cormorant-sc/latin-500.css';
+import '@fontsource/eb-garamond/latin-400.css';
+import '@fontsource/eb-garamond/latin-500.css';
+import '@fontsource/eb-garamond/latin-400-italic.css';
 import './styles/main.css';
 import './styles/scene.css';
 import { site, projects } from './config.js';
@@ -66,10 +77,9 @@ function shieldSvg(p, i) {
 function renderProjects() {
   grid.innerHTML = projects
     .map((p, i) => {
-      const delay = `style="--delay:${i * 120}ms"`;
       if (p.status !== 'ready') {
         return `
-          <li class="arms arms--blank reveal" ${delay}>
+          <li class="arms arms--blank reveal">
             <div class="arms__hang">${shieldSvg(p, i)}</div>
             <h3 class="arms__title">${escapeHtml(t('projects.incoming'))}</h3>
             <p class="arms__blazon">${escapeHtml(t(`blazon.${p.division ?? 'plain'}`))}</p>
@@ -78,7 +88,7 @@ function renderProjects() {
       }
       const tags = (p.tags ?? []).map(escapeHtml).join(', ');
       return `
-        <li class="arms reveal" ${delay}>
+        <li class="arms reveal">
           <a class="arms__link" href="${escapeHtml(p.url ?? site.links.github)}" target="_blank" rel="noopener noreferrer">
             <div class="arms__hang">${shieldSvg(p, i)}</div>
             <h3 class="arms__title">${escapeHtml(localize(p.title))}</h3>
@@ -88,6 +98,8 @@ function renderProjects() {
         </li>`;
     })
     .join('');
+  // Stagger via CSSOM (allowed by the CSP, unlike inline style attributes)
+  [...grid.children].forEach((li, i) => li.style.setProperty('--delay', `${i * 120}ms`));
   observeReveals(grid);
 }
 
@@ -120,14 +132,56 @@ function syncToggle(lang) {
   toggle.querySelectorAll('[data-lang]').forEach((s) => s.classList.toggle('is-active', s.dataset.lang === lang));
 }
 let world = null;
+
+// ---------- Pause motion (WCAG 2.2.2) ----------
+// Remembered on this device only. Hidden when the OS already asks for reduced motion (the scene is static then).
+const MOTION_KEY = 'portfolio-motion';
+const motionToggle = document.getElementById('motion-toggle');
+let motionOn = true;
+try {
+  motionOn = localStorage.getItem(MOTION_KEY) !== 'off';
+} catch {
+  /* storage unavailable: default to motion on */
+}
+function syncMotionLabel() {
+  motionToggle.textContent = t(motionOn ? 'motion.pause' : 'motion.play');
+}
+function applyMotion() {
+  document.documentElement.classList.toggle('motion-paused', !motionOn);
+  world?.setMotion(motionOn);
+  syncMotionLabel();
+}
+if (!reducedMotion) {
+  motionToggle.hidden = false;
+  motionToggle.addEventListener('click', () => {
+    motionOn = !motionOn;
+    try {
+      localStorage.setItem(MOTION_KEY, motionOn ? 'on' : 'off');
+    } catch {
+      /* ignore */
+    }
+    applyMotion();
+  });
+}
+
+// ---------- Privacy dialog ----------
+const privacy = document.getElementById('privacy');
+document.getElementById('privacy-open').addEventListener('click', () => privacy.showModal());
+document.getElementById('privacy-close').addEventListener('click', () => privacy.close());
+privacy.addEventListener('click', (e) => {
+  // Click on the backdrop closes it
+  if (e.target === privacy) privacy.close();
+});
 onLangChange((lang) => {
   syncToggle(lang);
+  syncMotionLabel();
   renderProjects();
   // Text length changes section heights, which moves the camera stops.
   world?.remeasure();
 });
 toggle.addEventListener('click', () => setLang(getLang() === 'en' ? 'es' : 'en'));
 initLang();
+applyMotion();
 observeReveals();
 
 // ---------- Cinematic scroll for in-page links ----------
@@ -187,5 +241,6 @@ const sceneEl = document.getElementById('scene');
 import('./scene/world.js')
   .then(({ startWorld }) => {
     world = startWorld(sceneEl, { reducedMotion }) ?? null;
+    applyMotion();
   })
   .catch(() => sceneEl.classList.add('no-webgl'));

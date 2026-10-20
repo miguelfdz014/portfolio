@@ -10,6 +10,8 @@
   --crimson: #c8102e;
   --crimson-deep: #8b0a1f;
   --crimson-bright: #e8213f;
+  /* Crimson for small text: 5.7:1 on black, 4.8:1 on panels (WCAG AA) */
+  --crimson-text: #f04a62;
 
   /* Display: Cormorant Garamond Light. Labels: Cormorant SC small caps. Body: EB Garamond. */
   --font-display: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
@@ -62,6 +64,11 @@ a {
 ::selection {
   background: var(--crimson);
   color: var(--white);
+}
+
+.sprite {
+  position: absolute;
+  overflow: hidden;
 }
 
 .skip-link {
@@ -150,11 +157,35 @@ a {
   transition: color 0.25s;
 }
 .nav__num {
-  color: var(--crimson);
+  color: var(--crimson-text);
   font-size: 0.9rem;
 }
 .nav__links a:hover {
   color: var(--white);
+}
+
+.nav-toggle {
+  padding: 0.4rem 0.7rem;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--bone);
+  font-family: var(--font-label);
+  font-size: 0.98rem;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s;
+}
+.nav-toggle:hover {
+  border-color: var(--white);
+  color: var(--white);
+}
+
+/* Pause motion: freezes CSS animations too (the 3D scene has its own clock) */
+.motion-paused *,
+.motion-paused *::before,
+.motion-paused *::after {
+  animation-play-state: paused !important;
 }
 
 .lang-toggle {
@@ -217,7 +248,7 @@ a {
   transform: rotate(45deg);
 }
 .kicker__num {
-  color: var(--crimson);
+  color: var(--crimson-text);
 }
 .kicker__num::after {
   content: '';
@@ -496,7 +527,7 @@ a {
   line-height: 1.1;
 }
 .arms__link:hover .arms__title {
-  color: var(--crimson-bright);
+  color: var(--crimson-text);
 }
 .arms__blazon {
   max-width: 22rem;
@@ -524,7 +555,7 @@ a {
   gap: 1rem;
 }
 .stack dt {
-  color: var(--crimson-bright);
+  color: var(--crimson-text);
 }
 .stack dd {
   margin: 0;
@@ -567,7 +598,7 @@ a {
 }
 .contact__row:hover {
   padding-left: 1rem;
-  color: var(--crimson-bright);
+  color: var(--crimson-text);
 }
 .contact__row:hover .contact__arrow {
   transform: translate(4px, -4px);
@@ -639,5 +670,59 @@ a {
   .contact {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+  }
+}
+
+/* Footer links and the privacy dialog */
+.footer__link {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.footer__link:hover {
+  color: var(--white);
+}
+.privacy {
+  width: min(36rem, calc(100% - 32px));
+  padding: clamp(1.4rem, 4vw, 2.4rem);
+  background: var(--coal);
+  color: var(--white);
+  border: 1px solid var(--line-strong);
+}
+.privacy::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+.privacy h2 {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 2.2rem;
+}
+.privacy p {
+  margin: 0 0 1rem;
+  color: var(--bone);
+}
+.privacy a {
+  color: var(--crimson-text);
+}
+.privacy .btn {
+  margin-top: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .nav-toggle {
+    margin-left: auto;
+  }
+  .nav-toggle + .lang-toggle {
+    margin-left: 0;
   }
 }

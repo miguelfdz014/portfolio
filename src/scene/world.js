@@ -339,8 +339,7 @@ export function startWorld(container, { reducedMotion }) {
   const dummy = new THREE.Object3D();
   const pos = new THREE.Vector3();
   const look = new THREE.Vector3();
-  let start = performance.now();
-  let last = start;
+  let last = performance.now();
   let u = null;
 
   function placeCamera(t, dt) {
@@ -370,26 +369,32 @@ export function startWorld(container, { reducedMotion }) {
     }
   }
 
+  // Animation has its own clock so it can be paused (WCAG 2.2.2) while the camera still follows scroll.
+  let animT = 0;
+  let motionPaused = false;
+
   function render(now) {
-    const t = (now - start) / 1000;
     // rAF timestamps can precede performance.now(), so clamp to a sane, non-negative step.
     const dt = Math.min(Math.max((now - last) / 1000, 0), 0.05);
     last = now;
+    const adt = motionPaused ? 0 : dt;
+    animT += adt;
+    const t = animT;
     placeCamera(t, dt);
-    sky.update(t, dt, camera);
+    sky.update(t, adt, camera);
 
     if (!reducedMotion) {
-      updateMount(t, dt);
+      updateMount(t, adt);
       water.material.uniforms.time.value = t * 0.5;
       clouds.time = t;
 
       const { mesh, data } = petals;
       for (let i = 0; i < data.length; i++) {
         const d = data[i];
-        d.y -= d.vy * dt;
-        d.x += 1.2 * dt;
-        d.rx += d.vrx * dt;
-        d.ry += d.vry * dt;
+        d.y -= d.vy * adt;
+        d.x += 1.2 * adt;
+        d.rx += d.vrx * adt;
+        d.ry += d.vry * adt;
         if (d.y < -35) d.y = 35;
         if (d.x > 60) d.x = -60;
         dummy.position.set(d.x + Math.sin(t * d.swaySpeed + d.phase) * d.sway, d.y, d.z);
@@ -440,9 +445,8 @@ export function startWorld(container, { reducedMotion }) {
   for (const m of postMats) postScene.add(new THREE.Mesh(quad, m));
   const compiled = Promise.all([renderer.compileAsync(scene, camera), renderer.compileAsync(postScene, camera)]).catch(() => {});
   Promise.all([compiled, heroReady]).then(() => {
-    start = performance.now();
-    last = start;
-    render(start);
+    last = performance.now();
+    render(last);
     container.classList.add('is-ready');
     play();
   });
@@ -457,5 +461,10 @@ export function startWorld(container, { reducedMotion }) {
     }
   });
 
-  return { remeasure: measure };
+  return {
+    remeasure: measure,
+    setMotion(on) {
+      motionPaused = !on;
+    },
+  };
 }

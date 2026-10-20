@@ -30,3 +30,12 @@ npm run preview   # serve the built site
 5. Click **Save and Deploy**. The site goes live at `https://<project>.pages.dev`.
 
 After that, every push to `main` redeploys automatically. To use your own domain, open the project → **Custom domains**.
+
+## Security, privacy and accessibility
+
+- **No third-party requests.** Fonts are self-hosted (`@fontsource`), there are no analytics, cookies or trackers.
+- **Security headers** live in `public/_headers` (strict Content-Security-Policy, HSTS, no framing). `npm run preview` applies the same headers locally.
+- **Cloudflare settings:** keep features that inject scripts *off* (Web Analytics auto-injection, Rocket Loader, Email Obfuscation, Zaraz) — the CSP would block them, and they would also change the privacy notice.
+- **Accessibility:** WCAG AA contrast, keyboard focus styles, skip link, `prefers-reduced-motion` support and a *Pause motion* button.
+- **Licences:** the site is © Miguel Fernández, all rights reserved (see `LICENSE`). Bundled third-party licences are in `public/third-party-notices.txt`; regenerate with `npm run notices` after changing dependencies.
+
