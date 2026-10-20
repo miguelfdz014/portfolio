@@ -166,3 +166,407 @@
     display: none;
   }
 }
+
+/* ---------------- Controls laid over the painted stages (src/ui/overlay.js) ---------------- */
+/* Fixed to the viewport while their section is on screen; sections must not get transformed ancestors. */
+.stage-ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.stage-ui [data-art] {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  transition: opacity 0.4s ease;
+}
+.stage-ui .is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------------- About: the chronicle over the library painting (src/ui/about.js) ---------------- */
+/* --art-w is the painting's on-screen width (set by the overlay), so text scales with the art. */
+/* Painted-scene sections keep their text in a panel at the bottom left, clear of the art's subject. */
+.section[data-stage] .section__inner {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  max-width: min(34rem, 92vw);
+  margin-left: 0;
+  padding-bottom: 7vh;
+  background: radial-gradient(130% 55% at 0% 100%, rgba(5, 5, 6, 0.78), rgba(5, 5, 6, 0.4) 55%, transparent 80%);
+}
+.section[data-stage] .section__inner h2 {
+  font-size: clamp(2.2rem, 4.4vw, 3.6rem);
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* The book is a large, quiet hotspot: a warm glow on hover or focus. */
+.stage-ui .book {
+  width: calc(var(--art-w, 1600px) * 0.3);
+  height: calc(var(--art-w, 1600px) * 0.09);
+  border: 0;
+  border-radius: 40%;
+  background: radial-gradient(ellipse, rgba(255, 220, 160, 0.18), transparent 70%);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+.stage-ui .book:hover,
+.stage-ui .book:focus-visible,
+.stage-ui .book[aria-expanded='true'] {
+  opacity: 1;
+}
+.stage-ui .book__notes {
+  width: min(24rem, calc(var(--art-w, 1600px) * 0.22));
+  padding: 1rem 1.3rem;
+  background: #e9dcc0;
+  color: #2a180c;
+  border-left: 3px solid var(--crimson);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-body);
+}
+.stage-ui .book__notes[hidden] {
+  display: none;
+}
+.stage-ui .book__notes .stack {
+  margin: 0;
+  border: 0;
+}
+.stage-ui .book__notes .stack > div {
+  border-color: rgba(42, 24, 12, 0.18);
+}
+.stage-ui .book__notes .stack dt {
+  color: #7a0a1c;
+}
+.stage-ui .book__notes .stack dd {
+  color: #2a180c;
+}
+.stage-ui .scrolls {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: calc(var(--art-w, 1600px) * 0.006);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scroll,
+.hobby {
+  position: relative;
+  width: calc(var(--art-w, 1600px) * 0.014);
+  height: calc(var(--art-w, 1600px) * 0.014);
+  min-width: 24px;
+  min-height: 24px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+/* Sealed (awaiting): a crimson wax seal. In progress: the seal broken open, a gold ring. */
+.scroll[data-status='awaiting'] {
+  background: radial-gradient(circle at 40% 35%, var(--crimson-bright), var(--crimson-deep) 70%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.scroll[data-status='progress'] {
+  background: radial-gradient(circle, transparent 45%, #d9b25a 48% 62%, transparent 65%);
+  box-shadow: 0 0 10px rgba(217, 178, 90, 0.7);
+}
+.hobby {
+  background: radial-gradient(circle, rgba(255, 236, 200, 0.9), rgba(255, 236, 200, 0) 60%);
+  animation: hobby-pulse 2.6s ease-in-out infinite;
+}
+@keyframes hobby-pulse {
+  50% { box-shadow: 0 0 0 calc(var(--art-w, 1600px) * 0.008) rgba(255, 236, 200, 0.15); }
+}
+.motion-paused .hobby { animation: none; }
+.scroll::after,
+.hobby::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 18rem;
+  padding: 0.45em 0.8em;
+  background: #e9dcc0;
+  color: #2a180c;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  border-left: 3px solid var(--crimson);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.scroll:hover::after,
+.scroll:focus-visible::after,
+.hobby:hover::after,
+.hobby:focus-visible::after {
+  opacity: 1;
+}
+
+/* Flow layout (src/ui/flow.js): controls drop into the page under their section's text. */
+.stage-flow .stage-ui {
+  position: static;
+  pointer-events: auto;
+  align-self: flex-end;
+  width: min(34rem, calc(100% - 2 * var(--gutter)));
+  margin: 0 var(--gutter) 6vh;
+  padding: 1.2rem 1.4rem;
+  background: rgba(5, 5, 6, 0.72);
+}
+.stage-flow .stage-ui [data-art] {
+  position: static;
+  transform: none;
+}
+.stage-flow .stage-ui .is-hidden {
+  opacity: 1;
+  pointer-events: auto;
+}
+.stage-flow .stage-ui .book {
+  display: none;
+}
+.stage-flow .stage-ui .book__notes,
+.stage-flow .stage-ui .book__notes[hidden] {
+  display: block;
+  width: auto;
+}
+.stage-flow .section[data-stage] .section__inner {
+  min-height: auto;
+  max-width: none;
+  background: none;
+  padding-top: 12vh;
+}
+.stage-flow .stage-ui .scrolls {
+  grid-template-columns: 1fr;
+  margin-top: 1.2rem;
+}
+/* Certifications become a readable list; the hobbies are already named in the section text. */
+.stage-flow .hobby {
+  display: none;
+}
+.stage-flow .scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: auto;
+  height: auto;
+  padding: 0.35rem 0 0.35rem 1.9rem;
+  border-radius: 0;
+  background-size: 1.2rem 1.2rem;
+  background-repeat: no-repeat;
+  background-position: left center;
+  box-shadow: none;
+  color: var(--bone);
+  text-align: left;
+}
+.stage-flow .scroll::after {
+  position: static;
+  transform: none;
+  opacity: 1;
+  max-width: none;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  color: var(--bone);
+}
+
+/* ---------------- Projects: parchments on the quest board (src/ui/board.js) ---------------- */
+.stage-ui .board {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.parchment {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--art-w, 1600px) * 0.062);
+  aspect-ratio: 3 / 4;
+  padding: 18% 10% 8%;
+  border: 0;
+  background: url('../art/board/parchment-1280.webp') center / contain no-repeat;
+  color: #3a2412;
+  font-family: var(--font-body);
+  font-size: calc(var(--art-w, 1600px) * 0.0072);
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.55));
+  transition: transform 0.35s var(--ease);
+}
+/* The dagger and wax seal pinning each parchment. */
+.parchment::before {
+  content: '';
+  position: absolute;
+  top: -12%;
+  left: 50%;
+  width: 34%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  background: url('../art/board/dagger-seal-1280.webp') center / contain no-repeat;
+}
+.parchment[data-status='sealed'] {
+  cursor: default;
+  font-style: italic;
+  color: #6b4a2c;
+}
+.parchment[data-status='ready']:hover,
+.parchment[data-status='ready']:focus-visible {
+  transform: translateY(-4%) rotate(-1.5deg);
+}
+.board__next {
+  padding: 0.5em 0.9em;
+  border: 1px solid var(--line-strong);
+  background: rgba(5, 5, 6, 0.6);
+  color: var(--white);
+  font-family: var(--font-label);
+  cursor: pointer;
+}
+/* An unrolled quest: the open scroll in the middle of the screen. */
+.stage-ui .quest {
+  position: fixed;
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  overflow: visible;
+  width: min(40rem, 90vw);
+  aspect-ratio: 4 / 3;
+  padding: 11% 12% 14%;
+  transform: translate(-50%, -50%);
+  background: url('../art/board/parchment-open-1280.webp') center / contain no-repeat;
+  color: #2a180c;
+  font-family: var(--font-body);
+  pointer-events: auto;
+  animation: unroll 0.5s var(--ease);
+}
+.stage-ui .quest h3 {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  margin: 0 0 0.5rem;
+}
+.stage-ui .quest a {
+  color: #7a0a1c;
+}
+.stage-ui .quest::backdrop {
+  background: rgba(2, 3, 8, 0.55);
+}
+.quest__tags {
+  font-family: var(--font-label);
+  color: #6b4a2c;
+}
+.quest__close {
+  display: block;
+  margin-top: 1rem;
+  border: 0;
+  background: none;
+  color: #7a0a1c;
+  font-family: var(--font-label);
+  cursor: pointer;
+  text-decoration: underline;
+}
+@keyframes unroll {
+  from { transform: translate(-50%, -50%) scaleY(0.1); opacity: 0; }
+}
+.motion-paused .stage-ui .quest { animation: none; }
+
+/* Flow layout (src/ui/flow.js): controls drop into the page under their section's text. */
+.stage-flow .stage-ui .board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 1.6rem;
+}
+.stage-flow .parchment {
+  width: 100%;
+  font-size: 0.95rem;
+}
+.stage-flow .parchment[data-status='ready']:hover,
+.stage-flow .parchment[data-status='ready']:focus-visible {
+  transform: rotate(-1.5deg);
+}
+
+/* ---------------- Contact: links written on the desk's parchment (src/ui/contact.js) ---------------- */
+.stage-ui .letter {
+  position: absolute;
+  display: grid;
+  gap: calc(var(--art-w, 1600px) * 0.006);
+  width: calc(var(--art-w, 1600px) * 0.22);
+  /* The parchment lies at an angle on the desk. */
+  transform: translate(-50%, -50%) rotate(-3deg) skewX(8deg);
+  font-family: var(--font-display);
+}
+.letter__line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9em;
+  color: #2a180c;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(42, 24, 12, 0.25);
+  padding-bottom: 0.15em;
+}
+.letter__label {
+  font-size: calc(var(--art-w, 1600px) * 0.017);
+  font-style: italic;
+}
+.letter__handle {
+  font-family: var(--font-label);
+  font-size: calc(var(--art-w, 1600px) * 0.0085);
+  color: #6b4a2c;
+}
+.letter__line:hover,
+.letter__line:focus-visible {
+  color: #7a0a1c;
+  border-bottom-color: #7a0a1c;
+}
+/* The wax seal stamps down on the letter when a link is used. */
+.letter__seal {
+  position: absolute;
+  right: -6%;
+  bottom: -40%;
+  width: 18%;
+  aspect-ratio: 1;
+  background: url('../art/desk/seal-1280.webp') center / contain no-repeat;
+  opacity: 0;
+  pointer-events: none;
+}
+.letter__seal.is-stamped {
+  animation: stamp 2.4s var(--ease) forwards;
+}
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(2.2); }
+  18% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+.motion-paused .letter__seal.is-stamped { animation: none; }
+
+/* Flow layout (src/ui/flow.js): controls drop into the page under their section's text. */
+.stage-flow .stage-ui .letter {
+  position: static;
+  width: auto;
+  transform: none;
+  padding: 1.2rem 1.4rem;
+  background: #e9dcc0;
+  border-left: 3px solid var(--crimson);
+}
+.stage-flow .letter__label {
+  font-size: 1.8rem;
+}
+.stage-flow .letter__handle {
+  font-size: 1rem;
+}

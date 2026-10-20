@@ -11,6 +11,9 @@ const parts = [
   'This site bundles the following open-source software and fonts.',
   'Everything else on the site is © Miguel Fernández. All rights reserved.',
   '',
+  'The artwork (paintings, sprites and the library animation) was generated with',
+  'Higgsfield AI image and video models (https://higgsfield.ai) and arranged for this site.',
+  '',
 ];
 for (const name of deps) {
   const pkg = JSON.parse(readFileSync(new URL(`node_modules/${name}/package.json`, root)));

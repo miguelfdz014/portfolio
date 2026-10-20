@@ -11,8 +11,13 @@ import '@fontsource/eb-garamond/latin-500.css';
 import '@fontsource/eb-garamond/latin-400-italic.css';
 import './styles/main.css';
 import './styles/scene.css';
-import { site, projects } from './config.js';
+import { site, projects, certifications } from './config.js';
 import { initLang, setLang, getLang, onLangChange, t, localize } from './i18n.js';
+import { renderAbout } from './ui/about.js';
+import { renderBoard } from './ui/board.js';
+import { renderContact } from './ui/contact.js';
+import { applyFlow, hasWebGL } from './ui/flow.js';
+import { mountOverlay } from './ui/overlay.js';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -36,72 +41,21 @@ function toRoman(n) {
 }
 document.getElementById('roman-year').textContent = toRoman(year);
 
-// ---------- Projects ----------
-const grid = document.getElementById('projects-grid');
-
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-}
-
-// Heater-shield outline, viewBox 0 0 200 240.
-const SHIELD = 'M12 8H188V104C188 168 148 210 100 232C52 210 12 168 12 104Z';
-const DIVISIONS = {
-  plain: '',
-  pale: '<path class="arms__division" d="M100 8V232" />',
-  chevron: '<path class="arms__division" d="M14 196L100 104L186 196" />',
-  bend: '<path class="arms__division" d="M12 8L188 200" />',
-};
-
-function shieldSvg(p, i) {
-  const id = `arms-clip-${i}`;
-  const ready = p.status === 'ready';
-  // A finished project carries its initial as the charge; a blank one shows an empty inescutcheon.
-  const charge = ready
-    ? `<text class="arms__charge" x="100" y="146" text-anchor="middle">${escapeHtml(String(localize(p.title) ?? '?').charAt(0))}</text>`
-    : `<path class="arms__empty" d="${SHIELD}" transform="translate(100 118) scale(0.3) translate(-100 -120)" />`;
-  return `
-    <svg class="arms__shield" viewBox="0 0 200 240" aria-hidden="true">
-      <defs><clipPath id="${id}"><path d="${SHIELD}" /></clipPath></defs>
-      <g clip-path="url(#${id})">
-        <rect width="200" height="240" fill="#050506" />
-        <rect width="200" height="240" fill="url(#hatch-sable)" />
-        <rect class="arms__gules" width="200" height="240" fill="url(#hatch-gules)" />
-        ${DIVISIONS[p.division] ?? ''}
-        ${charge}
-      </g>
-      <path class="arms__edge" d="${SHIELD}" />
-      <path class="arms__edge arms__edge--inner" d="${SHIELD}" transform="translate(100 120) scale(0.92) translate(-100 -120)" />
-    </svg>`;
-}
-
+// ---------- Projects: the quest board ----------
+// Re-rendered on language change; the open parchment (if any) stays open.
+const boardRoot = document.querySelector('.stage-ui[data-stage="board"]');
+let board = null;
 function renderProjects() {
-  grid.innerHTML = projects
-    .map((p, i) => {
-      if (p.status !== 'ready') {
-        return `
-          <li class="arms arms--blank reveal">
-            <div class="arms__hang">${shieldSvg(p, i)}</div>
-            <h3 class="arms__title">${escapeHtml(t('projects.incoming'))}</h3>
-            <p class="arms__blazon">${escapeHtml(t(`blazon.${p.division ?? 'plain'}`))}</p>
-            <p class="arms__note">${escapeHtml(t('projects.status'))}</p>
-          </li>`;
-      }
-      const tags = (p.tags ?? []).map(escapeHtml).join(', ');
-      return `
-        <li class="arms reveal">
-          <a class="arms__link" href="${escapeHtml(p.url ?? site.links.github)}" target="_blank" rel="noopener noreferrer">
-            <div class="arms__hang">${shieldSvg(p, i)}</div>
-            <h3 class="arms__title">${escapeHtml(localize(p.title))}</h3>
-          </a>
-          <p class="arms__blazon">${escapeHtml(localize(p.description))}</p>
-          ${tags ? `<p class="arms__note">${tags}</p>` : ''}
-        </li>`;
-    })
-    .join('');
-  // Stagger via CSSOM (allowed by the CSP, unlike inline style attributes)
-  [...grid.children].forEach((li, i) => li.style.setProperty('--delay', `${i * 120}ms`));
-  observeReveals(grid);
+  board = renderBoard(boardRoot, { projects, t, localize, openId: board?.openId });
 }
+
+// ---------- Contact: links on the desk's parchment ----------
+// The raven lives in the 3D scene, which loads after the page; until then the links simply work without it.
+const contactRoot = document.querySelector('.stage-ui[data-stage="desk"]');
+const ravenProxy = {
+  perk: (on) => world?.raven?.perk(on),
+  launch: () => world?.raven?.launch(),
+};
 
 // ---------- Reveal on scroll ----------
 const revealObserver =
@@ -132,6 +86,8 @@ function syncToggle(lang) {
   toggle.querySelectorAll('[data-lang]').forEach((s) => s.classList.toggle('is-active', s.dataset.lang === lang));
 }
 let world = null;
+// Scene controls per stage (mounted below, once the page and its controls exist).
+const overlays = new Map();
 
 // ---------- Pause motion (WCAG 2.2.2) ----------
 // Remembered on this device only. Hidden when the OS already asks for reduced motion (the scene is static then).
@@ -175,8 +131,11 @@ privacy.addEventListener('click', (e) => {
 onLangChange((lang) => {
   syncToggle(lang);
   syncMotionLabel();
+  renderAbout(document.querySelector('.stage-ui[data-stage="library"]'), { certifications, t, localize });
   renderProjects();
+  renderContact(contactRoot, { links: site.links, t, raven: ravenProxy, reducedMotion });
   // Text length changes section heights, which moves the camera stops.
+  for (const overlay of overlays.values()) overlay.refresh();
   world?.remeasure();
 });
 toggle.addEventListener('click', () => setLang(getLang() === 'en' ? 'es' : 'en'));
@@ -238,9 +197,31 @@ onScrollNav();
 
 // ---------- 3D scene (loaded separately so the page text appears first) ----------
 const sceneEl = document.getElementById('scene');
+// Scene controls are mounted and placed now, before the scene loads, so they are never piled in a corner. They
+// follow each painting's layout once the scene is up. Without WebGL they drop into the page flow (src/ui/flow.js).
+let webgl = hasWebGL();
+for (const root of document.querySelectorAll('.stage-ui[data-stage]')) {
+  const key = root.dataset.stage;
+  const overlay = mountOverlay(root, key, (i) => world?.rect(key, i), glideTo);
+  overlay.setActive(false);
+  overlays.set(key, overlay);
+}
+function layoutControls() {
+  applyFlow(webgl);
+  const W = 2 * (window.innerWidth / window.innerHeight);
+  for (const overlay of overlays.values()) overlay.place(W, { width: window.innerWidth, height: window.innerHeight });
+}
+layoutControls();
+window.addEventListener('resize', layoutControls);
+function noScene() {
+  webgl = false;
+  sceneEl.classList.add('no-webgl');
+  layoutControls();
+}
 import('./scene/world.js')
   .then(({ startWorld }) => {
-    world = startWorld(sceneEl, { reducedMotion }) ?? null;
+    world = startWorld(sceneEl, { reducedMotion, overlays }) ?? null;
+    if (!world) noScene();
     applyMotion();
   })
-  .catch(() => sceneEl.classList.add('no-webgl'));
+  .catch(noScene);
