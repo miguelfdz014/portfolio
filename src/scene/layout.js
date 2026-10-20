@@ -24,3 +24,16 @@ export function artToScreen(u, v, rect, W, viewport) {
   const y = rect.y + (0.5 - v) * rect.h;
   return { left: ((x + W / 2) / W) * viewport.width, top: ((1 - y) / 2) * viewport.height };
 }
+
+// Aspect ratios of the painted stages: 16:9 for square and wide screens, 9:16 for upright phones. Portrait paintings
+// keep people and hotspots in their central 80% of width, since phones taller than 9:16 crop a little off each side.
+export const LANDSCAPE_ASPECT = 16 / 9;
+export const PORTRAIT_ASPECT = 9 / 16;
+
+// The smallest rect with the painting's aspect that covers the whole view (W wide, 2 tall), centred.
+export function coverRect(W, imgAspect) {
+  const w = Math.max(W, 2 * imgAspect);
+  return { x: 0, y: 0, w, h: w / imgAspect };
+}
+
+export const stageAspect = (orient) => (orient === 'portrait' ? PORTRAIT_ASPECT : LANDSCAPE_ASPECT);

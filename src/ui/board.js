@@ -1,9 +1,8 @@
 // The Projects quest board: one parchment per project pinned to the painted board. A sealed (incoming) parchment
 // stays shut; a ready one unrolls into a dialog with its details. Five slots per board; more projects page on.
-import hotspots from '../art/hotspots.json';
+import { hotspotsFor } from '../scene/hotspots.js';
 
-const SLOTS = hotspots.board.slots;
-const PER_BOARD = SLOTS.length;
+const PER_BOARD = 5;
 
 function el(tag, attrs = {}, text) {
   const node = document.createElement(tag);
@@ -16,7 +15,9 @@ function escapeUrl(url) {
   return /^https?:\/\//.test(url ?? '') ? url : '#';
 }
 
-export function renderBoard(root, { projects, t, localize, openId = null }) {
+export function renderBoard(root, { projects, t, localize, openId = null, orient = 'landscape' }) {
+  const B = hotspotsFor('board', orient);
+  const SLOTS = B.slots;
   const ids = projects.map((_, i) => `quest-${i}`);
   let page = openId ? Math.floor(ids.indexOf(openId) / PER_BOARD) : 0;
   if (!(page >= 0)) page = 0;
@@ -78,7 +79,7 @@ export function renderBoard(root, { projects, t, localize, openId = null }) {
     });
     root.append(list);
     if (projects.length > PER_BOARD) {
-      const next = el('button', { type: 'button', class: 'board__next', 'data-art': `0,${hotspots.board.face[2]},${hotspots.board.face[3]}` }, t('board.next'));
+      const next = el('button', { type: 'button', class: 'board__next', 'data-art': `0,${B.face[2]},${B.face[3]}` }, t('board.next'));
       next.addEventListener('click', () => {
         page = (page + 1) % Math.ceil(projects.length / PER_BOARD);
         draw();

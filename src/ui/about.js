@@ -1,8 +1,7 @@
-// The About chronicle laid over the library painting: the intro and stack on the book's pages, one scroll per
-// certification on the shelf, and the hobby objects as labelled spots. All of it is real, focusable HTML.
-import hotspots from '../art/hotspots.json';
+// The About chronicle laid over the library painting: the book opens a parchment with the stack, one scroll per
+// certification on the scroll rack, and the hobby objects as labelled spots. All of it is real, focusable HTML.
+import { hotspotsFor } from '../scene/hotspots.js';
 
-const H = hotspots.library;
 const spot = ([u, v]) => `0,${u},${v}`;
 
 const STACK = [
@@ -27,7 +26,8 @@ function el(tag, attrs = {}, text) {
   return node;
 }
 
-export function renderAbout(root, { certifications, t, localize }) {
+export function renderAbout(root, { certifications, t, localize, orient = 'landscape' }) {
+  const H = hotspotsFor('library', orient);
   root.replaceChildren();
 
   // The book opens a parchment note with the stack (the pages themselves are crowded by the reader's arm).
@@ -49,13 +49,25 @@ export function renderAbout(root, { certifications, t, localize }) {
     stack.append(row);
   }
   notes.append(stack);
-  book.addEventListener('click', () => {
-    const open = book.getAttribute('aria-expanded') !== 'true';
+  const setOpen = (open) => {
     book.setAttribute('aria-expanded', String(open));
     notes.hidden = !open;
-  });
+  };
+  book.addEventListener('click', () => setOpen(book.getAttribute('aria-expanded') !== 'true'));
+  // The parchment covers the book, so Escape or a click anywhere else closes it. Listeners from an earlier render
+  // (language or orientation change) are dropped.
+  root._aboutAbort?.abort();
+  const { signal } = (root._aboutAbort = new AbortController());
+  root.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || notes.hidden) return;
+    setOpen(false);
+    book.focus();
+  }, { signal });
+  document.addEventListener('click', (e) => {
+    if (!notes.hidden && !notes.contains(e.target) && !book.contains(e.target)) setOpen(false);
+  }, { signal });
 
-  const shelf = el('ul', { class: 'scrolls', 'data-art': spot(H.scrollShelf), 'aria-label': t('about.scrolls') });
+  const shelf = el('ul', { class: 'scrolls', 'data-art': spot(H.scrollRack), 'aria-label': t('about.scrolls') });
   for (const c of certifications) {
     const label = t('cert.label', { name: localize(c.name), issuer: c.issuer, status: t(`cert.status.${c.status}`) });
     const li = el('li');

@@ -151,7 +151,6 @@
 .descent__line {
   max-width: 22ch;
   margin: 0;
-  font-style: italic;
   font-size: clamp(1.8rem, 1rem + 3.2vw, 3.6rem);
   line-height: 1.15;
   text-align: center;
@@ -188,7 +187,8 @@
 
 /* ---------------- About: the chronicle over the library painting (src/ui/about.js) ---------------- */
 /* --art-w is the painting's on-screen width (set by the overlay), so text scales with the art. */
-/* Painted-scene sections keep their text in a panel at the bottom left, clear of the art's subject. */
+/* Painted-scene sections keep their text in a solid dark panel, in the quiet corner each painting leaves for it:
+   the library's shelves (upper left), the board's roses and the writer's dark cloak (lower left). */
 .section[data-stage] .section__inner {
   min-height: 100vh;
   display: flex;
@@ -197,7 +197,54 @@
   max-width: min(34rem, 92vw);
   margin-left: 0;
   padding-bottom: 7vh;
-  background: radial-gradient(130% 55% at 0% 100%, rgba(5, 5, 6, 0.78), rgba(5, 5, 6, 0.4) 55%, transparent 80%);
+}
+/* Narrow enough to leave the dragon statue and the writer's head clear. */
+html:not(.stage-flow) #about .section__inner {
+  justify-content: flex-start;
+  max-width: min(27rem, 92vw);
+  padding-top: calc(4.5rem + 3vh);
+  padding-bottom: 0;
+}
+.section[data-stage] .panel {
+  padding: clamp(1.1rem, 2.4vw, 1.8rem) clamp(1.2rem, 2.6vw, 2.1rem);
+  background: rgb(14 11 9 / 0.86);
+  border-left: 1px solid var(--crimson);
+  box-shadow: 0 0 36px 18px rgb(14 11 9 / 0.5);
+}
+.section[data-stage] .panel p {
+  font-weight: 500;
+  text-shadow: none;
+}
+.section[data-stage] .panel .section__head {
+  margin-bottom: 0;
+}
+.section[data-stage] .section__inner--split .panel .section__head {
+  margin-bottom: 1.2rem;
+}
+.section[data-stage] .panel .dropcap {
+  margin: 0 0 1rem;
+  font-size: clamp(1.1rem, 1rem + 0.35vw, 1.3rem);
+  line-height: 1.5;
+}
+/* Upright phones over the tall paintings: every panel sits at the top, where each painting leaves calm sky or wall. */
+.is-portrait:not(.stage-flow) .section[data-stage] .section__inner {
+  justify-content: flex-start;
+  padding-top: 4.6rem;
+  padding-bottom: 0;
+}
+.is-portrait:not(.stage-flow) .section[data-stage] .panel {
+  /* Sticky so Contact's text still shows at the very bottom of the page, where its stop is. */
+  position: sticky;
+  top: 4.6rem;
+  padding: 0.9rem 1rem;
+}
+.is-portrait:not(.stage-flow) .section[data-stage] .section__inner h2 {
+  font-size: 2rem;
+}
+.is-portrait:not(.stage-flow) .section[data-stage] .panel .dropcap,
+.is-portrait:not(.stage-flow) .section[data-stage] .panel .prose__aside {
+  font-size: 1rem !important;
+  line-height: 1.4;
 }
 .section[data-stage] .section__inner h2 {
   font-size: clamp(2.2rem, 4.4vw, 3.6rem);
@@ -227,8 +274,14 @@
   opacity: 1;
 }
 .stage-ui .book__notes {
-  width: min(24rem, calc(var(--art-w, 1600px) * 0.22));
-  padding: 1rem 1.3rem;
+  /* Opened from the book: a readable parchment centred on screen, whatever the painting's size. */
+  left: 50% !important;
+  top: 50% !important;
+  z-index: 2;
+  width: min(28rem, 88vw);
+  padding: 1.4rem 1.6rem;
+  font-size: 1.12rem;
+  font-weight: 500;
   background: #e9dcc0;
   color: #2a180c;
   border-left: 3px solid var(--crimson);
@@ -318,9 +371,9 @@
 .stage-flow .stage-ui {
   position: static;
   pointer-events: auto;
-  align-self: flex-end;
-  width: min(34rem, calc(100% - 2 * var(--gutter)));
-  margin: 0 var(--gutter) 6vh;
+  align-self: flex-start;
+  width: min(34rem, 100%);
+  margin: 1.2rem 0 6vh;
   padding: 1.2rem 1.4rem;
   background: rgba(5, 5, 6, 0.72);
 }
@@ -339,6 +392,11 @@
 .stage-flow .stage-ui .book__notes[hidden] {
   display: block;
   width: auto;
+}
+/* Text panel first, its controls underneath, both full width. */
+.stage-flow .section[data-stage] {
+  flex-direction: column;
+  align-items: stretch;
 }
 .stage-flow .section[data-stage] .section__inner {
   min-height: auto;
@@ -399,7 +457,7 @@
   background: url('../art/board/parchment-1280.webp') center / contain no-repeat;
   color: #3a2412;
   font-family: var(--font-body);
-  font-size: calc(var(--art-w, 1600px) * 0.0072);
+  font-size: max(14px, calc(var(--art-w, 1600px) * 0.0072));
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
@@ -419,8 +477,12 @@
 }
 .parchment[data-status='sealed'] {
   cursor: default;
-  font-style: italic;
-  color: #6b4a2c;
+  color: #4a2e16;
+}
+/* On the tall phone painting the parchments are too small for words: the seal shows; the title opens on tap. */
+.is-portrait:not(.stage-flow) .parchment {
+  width: calc(var(--art-w, 475px) * 0.075);
+  font-size: 0;
 }
 .parchment[data-status='ready']:hover,
 .parchment[data-status='ready']:focus-visible {
@@ -505,7 +567,7 @@
   position: absolute;
   display: grid;
   gap: calc(var(--art-w, 1600px) * 0.006);
-  width: calc(var(--art-w, 1600px) * 0.22);
+  width: calc(var(--art-w, 1600px) * 0.19);
   /* The parchment lies at an angle on the desk. */
   transform: translate(-50%, -50%) rotate(-3deg) skewX(8deg);
   font-family: var(--font-display);
@@ -520,13 +582,30 @@
   padding-bottom: 0.15em;
 }
 .letter__label {
-  font-size: calc(var(--art-w, 1600px) * 0.017);
-  font-style: italic;
+  font-size: max(18px, calc(var(--art-w, 1600px) * 0.017));
+  font-weight: 500;
 }
 .letter__handle {
   font-family: var(--font-label);
-  font-size: calc(var(--art-w, 1600px) * 0.0085);
-  color: #6b4a2c;
+  font-size: max(14px, calc(var(--art-w, 1600px) * 0.0085));
+  font-weight: 500;
+  color: #4a2e16;
+}
+/* The tall phone painting's letter is narrower and nearer: scale the writing to it. */
+.is-portrait:not(.stage-flow) .stage-ui .letter {
+  width: calc(var(--art-w, 475px) * 0.32);
+}
+.is-portrait:not(.stage-flow) .letter__line {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  line-height: 1.1;
+}
+.is-portrait:not(.stage-flow) .letter__label {
+  font-size: max(18px, calc(var(--art-w, 475px) * 0.042));
+}
+.is-portrait:not(.stage-flow) .letter__handle {
+  font-size: 14px;
 }
 .letter__line:hover,
 .letter__line:focus-visible {

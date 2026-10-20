@@ -34,3 +34,25 @@ describe('layout', () => {
     expect(p.top).toBeCloseTo(225, 0);
   });
 });
+
+describe('coverRect', () => {
+  test('covers the whole view at the painting aspect, tight on one side', async () => {
+    const { coverRect, LANDSCAPE_ASPECT, PORTRAIT_ASPECT } = await import('../src/scene/layout.js');
+    for (const aspect of [LANDSCAPE_ASPECT, PORTRAIT_ASPECT]) {
+      for (const W of [0.9, 1.0, 2.0, 3.556, 4.78]) {
+        const r = coverRect(W, aspect);
+        expect(r.x).toBe(0);
+        expect(r.y).toBe(0);
+        expect(r.w).toBeGreaterThanOrEqual(W - 1e-9);
+        expect(r.h).toBeGreaterThanOrEqual(2 - 1e-9);
+        expect(r.w / r.h).toBeCloseTo(aspect, 9);
+        expect(Math.min(r.w - W, r.h - 2)).toBeCloseTo(0, 9);
+      }
+    }
+  });
+  test('portrait paintings are 9:16, landscape 16:9', async () => {
+    const { LANDSCAPE_ASPECT, PORTRAIT_ASPECT } = await import('../src/scene/layout.js');
+    expect(LANDSCAPE_ASPECT).toBeCloseTo(16 / 9);
+    expect(PORTRAIT_ASPECT).toBeCloseTo(9 / 16);
+  });
+});

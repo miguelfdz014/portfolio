@@ -18,8 +18,13 @@ import { renderBoard } from './ui/board.js';
 import { renderContact } from './ui/contact.js';
 import { applyFlow, hasWebGL } from './ui/flow.js';
 import { mountOverlay } from './ui/overlay.js';
+import { orientation } from './scene/orient.js';
+import { createMusic, readSoundPref, writeSoundPref } from './audio.js';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Upright screens show the tall portrait paintings, whose hotspots sit elsewhere.
+const viewOrient = () => orientation({ width: window.innerWidth, height: window.innerHeight });
+let orient = viewOrient();
 
 // ---------- Links & dates ----------
 document.querySelectorAll('[data-link]').forEach((a) => {
@@ -46,7 +51,7 @@ document.getElementById('roman-year').textContent = toRoman(year);
 const boardRoot = document.querySelector('.stage-ui[data-stage="board"]');
 let board = null;
 function renderProjects() {
-  board = renderBoard(boardRoot, { projects, t, localize, openId: board?.openId });
+  board = renderBoard(boardRoot, { projects, t, localize, openId: board?.openId, orient });
 }
 
 // ---------- Contact: links on the desk's parchment ----------
@@ -120,6 +125,39 @@ if (!reducedMotion) {
   });
 }
 
+// ---------- Sound (opt-in music) ----------
+// Off by default. A saved "on" waits for the first click or key press, since browsers block sound before that.
+const soundToggle = document.getElementById('sound-toggle');
+const music = createMusic({ src: new URL('./art/audio/night.m4a', import.meta.url).href });
+let storage = null;
+try {
+  storage = window.localStorage;
+} catch {
+  /* storage unavailable: sound stays off by default */
+}
+let soundOn = storage ? readSoundPref(storage) : false;
+function syncSoundLabel() {
+  soundToggle.textContent = t(soundOn ? 'sound.on' : 'sound.off');
+  soundToggle.setAttribute('aria-pressed', String(soundOn));
+}
+if (soundOn) {
+  const startOnInput = (e) => {
+    document.removeEventListener('click', startOnInput, true);
+    document.removeEventListener('keydown', startOnInput, true);
+    // The sound button's own click decides for itself.
+    if (soundOn && !soundToggle.contains(e.target)) music.setOn(true);
+  };
+  // Click, not pointerdown: a touch pointerdown isn't a user gesture on phones, so play() would be refused.
+  document.addEventListener('click', startOnInput, true);
+  document.addEventListener('keydown', startOnInput, true);
+}
+soundToggle.addEventListener('click', () => {
+  soundOn = !soundOn;
+  if (storage) writeSoundPref(storage, soundOn);
+  music.setOn(soundOn);
+  syncSoundLabel();
+});
+
 // ---------- Privacy dialog ----------
 const privacy = document.getElementById('privacy');
 document.getElementById('privacy-open').addEventListener('click', () => privacy.showModal());
@@ -128,12 +166,17 @@ privacy.addEventListener('click', (e) => {
   // Click on the backdrop closes it
   if (e.target === privacy) privacy.close();
 });
+// The scene controls, re-rendered on language change and when the screen turns between upright and wide.
+function renderControls() {
+  renderAbout(document.querySelector('.stage-ui[data-stage="library"]'), { certifications, t, localize, orient });
+  renderProjects();
+  renderContact(contactRoot, { links: site.links, t, raven: ravenProxy, reducedMotion, orient });
+}
 onLangChange((lang) => {
   syncToggle(lang);
   syncMotionLabel();
-  renderAbout(document.querySelector('.stage-ui[data-stage="library"]'), { certifications, t, localize });
-  renderProjects();
-  renderContact(contactRoot, { links: site.links, t, raven: ravenProxy, reducedMotion });
+  syncSoundLabel();
+  renderControls();
   // Text length changes section heights, which moves the camera stops.
   for (const overlay of overlays.values()) overlay.refresh();
   world?.remeasure();
@@ -208,6 +251,13 @@ for (const root of document.querySelectorAll('.stage-ui[data-stage]')) {
 }
 function layoutControls() {
   applyFlow(webgl);
+  // Lets CSS size the controls for the tall phone paintings.
+  document.documentElement.classList.toggle('is-portrait', viewOrient() === 'portrait');
+  if (viewOrient() !== orient) {
+    orient = viewOrient();
+    renderControls();
+    for (const overlay of overlays.values()) overlay.refresh();
+  }
   const W = 2 * (window.innerWidth / window.innerHeight);
   for (const overlay of overlays.values()) overlay.place(W, { width: window.innerWidth, height: window.innerHeight });
 }

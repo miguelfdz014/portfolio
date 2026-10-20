@@ -41,3 +41,14 @@ describe('art pipeline', () => {
     expect(budget(files, limits)).toEqual([{ name: 'art', bytes: 1200, max: 1000, ok: false }]);
   });
 });
+
+describe('portrait variants', () => {
+  test('a -portrait layer gets one phone-sized file', async () => {
+    const { variantNames } = await import('../scripts/art-lib.mjs');
+    expect(variantNames('room-portrait')).toEqual({ portrait: 'room-portrait-1280.webp' });
+  });
+  test('other layers keep their desktop and mobile files', async () => {
+    const { variantNames } = await import('../scripts/art-lib.mjs');
+    expect(variantNames('room')).toEqual({ desktop: 'room-2560.webp', mobile: 'room-1280.webp' });
+  });
+});
