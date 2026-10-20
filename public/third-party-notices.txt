@@ -4,6 +4,9 @@ Third-party notices
 This site bundles the following open-source software and fonts.
 Everything else on the site is © Miguel Fernández. All rights reserved.
 
+The artwork (paintings, sprites and the library animation) was generated with
+Higgsfield AI image and video models (https://higgsfield.ai) and arranged for this site.
+
 ------------------------------------------------------------------------
 three 0.185.0 (MIT)
 https://threejs.org/
